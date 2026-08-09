@@ -512,7 +512,9 @@ def reset_password():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('index'))
+    session.pop('_flashes', None)
+    flash('You have been logged out successfully.')
+    return redirect(url_for('login'))
 
 @app.route('/dress/<int:dress_id>')
 def detail(dress_id):
@@ -706,6 +708,55 @@ def lend_clothes():
         return redirect(url_for('dashboard'))
         
     return render_template('lend.html')
+
+@app.route('/remove_listing/<int:dress_id>', methods=['POST'])
+@login_required
+def remove_listing(dress_id):
+    dress = Dress.query.get(dress_id)
+    if not dress:
+        flash("Listing not found.")
+        return redirect(url_for('dashboard'))
+        
+    if dress.owner_id != current_user.id:
+        flash("Unauthorized action: You can only remove your own listings.")
+        return redirect(url_for('dashboard'))
+        
+    # Check for active orders/rentals
+    active_order = Order.query.filter(
+        Order.dress_id == dress.id,
+        Order.status.in_(['Paid', 'Active', 'Shipped'])
+    ).first()
+    
+    if active_order:
+        flash("This listing cannot be removed because it is currently rented.")
+        return redirect(url_for('dashboard'))
+        
+    try:
+        # Delete related (inactive) orders first to prevent ForeignKey violations
+        Order.query.filter_by(dress_id=dress.id).delete()
+        
+        # Delete the dress
+        db.session.delete(dress)
+        db.session.commit()
+        
+        # Remove uploaded image from static/assets if not a shared fallback
+        fallbacks = {'suit_premium.png', 'dress_premium.png', 'dress.png'}
+        if dress.image_file and dress.image_file not in fallbacks:
+            safe_filename = os.path.basename(dress.image_file)
+            image_path = os.path.join('static', 'assets', safe_filename)
+            if os.path.exists(image_path):
+                try:
+                    os.remove(image_path)
+                except Exception as img_err:
+                    print(f"Error removing image file {image_path}: {img_err}")
+                    
+        flash("Your listing has been removed successfully.")
+    except Exception as db_err:
+        db.session.rollback()
+        print(f"Database deletion error: {db_err}")
+        flash("An error occurred while removing your listing. Please try again.")
+        
+    return redirect(url_for('dashboard'))
 
 @app.route('/checkout/<int:dress_id>', methods=['GET', 'POST'])
 @login_required

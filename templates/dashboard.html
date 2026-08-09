@@ -484,8 +484,11 @@
                                     <span>Times Rented: <strong style="color: white;">{{ dress.orders|length }}</strong></span>
                                 </div>
                             </div>
-                            <div>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
                                 <a href="{{ url_for('detail', dress_id=dress.id) }}" class="btn btn-outline btn-small" style="font-size: 0.75rem; padding: 0.4rem 0.8rem;">View Listing</a>
+                                <form method="POST" action="{{ url_for('remove_listing', dress_id=dress.id) }}" onsubmit="return confirm('Are you sure you want to remove this listing?');" style="display: inline;">
+                                    <button type="submit" class="btn btn-outline btn-small" style="font-size: 0.75rem; padding: 0.4rem 0.8rem; border-color: rgba(220, 53, 69, 0.5); color: #ff4d4d; background: transparent; cursor: pointer; transition: all 0.2s ease;">Remove Listing</button>
+                                </form>
                             </div>
                         </div>
                         {% endfor %}

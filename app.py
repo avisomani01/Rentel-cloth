@@ -3,6 +3,8 @@ import re
 import secrets
 import smtplib
 import hmac
+import json
+import urllib.request
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 from email.header import Header
@@ -31,17 +33,18 @@ app.config['SMTP_USERNAME'] = os.environ.get('SMTP_USERNAME', 'dummy-sender@clot
 app.config['SMTP_PASSWORD'] = os.environ.get('SMTP_PASSWORD', 'dummy-password-123')
 app.config['SMTP_SENDER'] = os.environ.get('SMTP_SENDER', 'no-reply@clothesrent.com')
 
+# Resend API Configuration for production/free web service deployments
+app.config['RESEND_API_KEY'] = os.environ.get('RESEND_API_KEY')
+app.config['RESEND_SENDER'] = os.environ.get('RESEND_SENDER', 'onboarding@resend.dev')
+
 def generate_otp():
     # Cryptographically secure random 6 digit OTP
     digits = [str(secrets.randbelow(10)) for _ in range(6)]
     return "".join(digits)
 
 def send_otp_email(to_email, otp, purpose="register"):
-    smtp_server = app.config.get('SMTP_SERVER')
-    smtp_port = app.config.get('SMTP_PORT')
-    smtp_user = app.config.get('SMTP_USERNAME')
-    smtp_pass = app.config.get('SMTP_PASSWORD')
-    smtp_sender = app.config.get('SMTP_SENDER')
+    resend_api_key = app.config.get('RESEND_API_KEY')
+    resend_sender = app.config.get('RESEND_SENDER') or 'onboarding@resend.dev'
     
     subject = f"OTP Code for Closet Share - {purpose.capitalize()}"
     body = f"""Hello,
@@ -58,6 +61,51 @@ If you did not request this code, you can safely ignore this email.
 Warm regards,
 Closet Share Team
 """
+    # Attempt to send using Resend HTTP API if configured
+    if resend_api_key:
+        try:
+            url = "https://api.resend.com/emails"
+            headers = {
+                "Authorization": f"Bearer {resend_api_key}",
+                "Content-Type": "application/json"
+            }
+            # Resend requires a validated sender, defaulting to onboarding@resend.dev for developer testing
+            data = {
+                "from": resend_sender,
+                "to": [to_email],
+                "subject": subject,
+                "text": body
+            }
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(data).encode('utf-8'),
+                headers=headers,
+                method='POST'
+            )
+            with urllib.request.urlopen(req, timeout=10) as response:
+                res_body = response.read().decode('utf-8')
+                res_data = json.loads(res_body)
+                if "id" in res_data:
+                    return True
+                else:
+                    raise ValueError(f"Resend response missing ID: {res_data}")
+        except Exception as e:
+            print("\n" + "="*60)
+            print(f"  [RESEND API EMAIL SENDING ERROR]")
+            print(f"  Recipient: {to_email}")
+            print(f"  Subject: {subject}")
+            print(f"  OTP Code: {otp}")
+            print(f"  Error details: {e}")
+            print("="*60 + "\n")
+            # If Resend was explicitly set, we print error but can also try SMTP fallback if available
+
+    # Fallback to standard SMTP
+    smtp_server = app.config.get('SMTP_SERVER')
+    smtp_port = app.config.get('SMTP_PORT')
+    smtp_user = app.config.get('SMTP_USERNAME')
+    smtp_pass = app.config.get('SMTP_PASSWORD')
+    smtp_sender = app.config.get('SMTP_SENDER')
+    
     try:
         # Check for dummy settings or placeholder credentials
         is_dummy = (

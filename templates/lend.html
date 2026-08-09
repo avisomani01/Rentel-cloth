@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lend Your Wardrobe - Rented Clothes</title>
+    <meta name="description" content="Give your clothes for rent on our exclusive peer-to-peer fashion platform.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3">
+    <style>
+        .lend-wrapper {
+            max-width: 900px;
+            margin: 120px auto 60px;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 4rem;
+            align-items: start;
+        }
+
+        .lend-form-container {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 3rem;
+            border-radius: 24px;
+        }
+
+        .form-title {
+            font-family: var(--font-serif);
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent-color);
+        }
+
+        .form-subtitle {
+            color: #a0a0a0;
+            font-size: 0.95rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.8rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.6rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #c0c0c0;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 0.9rem 1.2rem;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            background: rgba(255,255,255,0.03);
+            color: white;
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .form-group textarea {
+            height: 120px;
+            resize: none;
+        }
+
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            border-color: var(--accent-color);
+            background: rgba(255,255,255,0.06);
+            box-shadow: 0 0 10px rgba(201, 162, 101, 0.1);
+        }
+
+        /* Image Drag & Drop visual */
+        .upload-zone {
+            border: 2px dashed rgba(201, 162, 101, 0.25);
+            background: rgba(255, 255, 255, 0.01);
+            border-radius: 16px;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--accent-color);
+            background: rgba(201, 162, 101, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            color: var(--accent-color);
+            margin-bottom: 0.8rem;
+        }
+
+        .upload-text {
+            color: #d1d5db;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .upload-hint {
+            color: #666;
+            font-size: 0.8rem;
+            margin-top: 0.4rem;
+        }
+
+        .lend-preview-panel {
+            background: rgba(255,255,255,0.01);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            position: sticky;
+            top: 120px;
+            text-align: center;
+        }
+
+        .preview-title {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: #a0a0a0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .preview-card-box {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            overflow: hidden;
+            position: relative;
+            min-height: 380px;
+            justify-content: space-between;
+        }
+
+        .preview-img {
+            width: 75%;
+            height: auto;
+            max-height: 200px;
+            object-fit: contain;
+            margin: 0 auto;
+            filter: drop-shadow(0 20px 20px rgba(0,0,0,0.5));
+            transition: filter 0.3s;
+        }
+
+        .preview-content {
+            background: rgba(0,0,0,0.4);
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: left;
+        }
+
+        .preview-content h4 {
+            font-size: 1.2rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .preview-content p {
+            color: #888;
+            font-size: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .preview-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        @media (max-width: 900px) {
+            .lend-wrapper {
+                grid-template-columns: 1fr;
+            }
+            .lend-preview-panel {
+                position: relative;
+                top: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="{{ url_for('index') }}" class="logo" style="text-decoration: none; color: white;">RC.</a>
+        <ul class="nav-links">
+        </ul>
+        <a href="{{ url_for('dashboard') }}#lending-console" class="btn btn-outline">My Listings</a>
+    </nav>
+
+    <div class="lend-wrapper fade-in visible">
+        <div class="lend-form-container">
+            <h1 class="form-title">Lend Your Outfit</h1>
+            <p class="form-subtitle">Earn money by renting your premium ethnic or formal wear. We take care of cleaning and shipping.</p>
+
+            <form action="{{ url_for('lend_clothes') }}" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="name">Garment Name</label>
+                    <input type="text" id="name" name="name" required placeholder="E.g., Emerald Velvet Sherwani" oninput="updatePreviewName(this.value)">
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Garment Category</label>
+                    <input type="text" id="category" name="category" required placeholder="E.g., Sherwani, Lehenga, Tuxedo, Evening Dress..." oninput="updatePreviewTemplate(this.value)">
+                </div>
+
+                <div class="form-group">
+                    <label for="price">Daily Rental Price (₹)</label>
+                    <input type="number" id="price" name="price" required placeholder="E.g., 3500" oninput="updatePreviewPrice(this.value)">
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" required placeholder="Detail the material (e.g. Italian wool, velvet), size details, designer name, and fit details..." oninput="updatePreviewDesc(this.value)"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Garment Photo</label>
+                    <div class="upload-zone" onclick="simulateFileUpload()">
+                        <div class="upload-icon">↑</div>
+                        <div class="upload-text" id="upload-status">Select files or drag & drop</div>
+                        <p class="upload-hint">Upload high-res photo. Max file size: 10MB.</p>
+                        <input type="file" id="mock-file-input" name="image" accept="image/png, image/jpeg, image/jpg, image/gif, image/webp" style="display: none;" onchange="handleFileSelect(this)" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">List in Collection</button>
+            </form>
+        </div>
+
+        <!-- Real-time design rendering preview -->
+        <div class="lend-preview-panel">
+            <h3 class="preview-title">Live Preview</h3>
+            <div class="preview-card-box">
+                <div style="width:100%; text-align:center;">
+                    <!-- Preview image gets updated with the AI template and color styling shade -->
+                    <img id="preview-image-el" src="{{ url_for('static', filename='assets/dress_premium.png') }}" alt="Preview garment" class="preview-img">
+                </div>
+                
+                <div class="preview-content">
+                    <h4 id="preview-name-el">Garment Title</h4>
+                    <p id="preview-desc-el" style="min-height: 38px;">Italian fabric velvet custom tailoring...</p>
+                    <div class="preview-footer">
+                        <span style="color: var(--accent-color); font-weight:600;" id="preview-price-el">₹0.00 / day</span>
+                        <span class="btn btn-small" style="padding: 0.3rem 0.8rem; font-size: 0.75rem;">Rent Now</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const imageAssets = {
+            gown: "{{ url_for('static', filename='assets/dress_premium.png') }}",
+            suit: "{{ url_for('static', filename='assets/suit_premium.png') }}"
+        };
+
+        const filterShades = {
+            default: '',
+            blue: 'filter: hue-rotate(180deg);',
+            red: 'filter: hue-rotate(-90deg);',
+            green: 'filter: hue-rotate(90deg);'
+        };
+
+        let currentCategory = 'gown';
+        let currentColor = 'default';
+
+        function updatePreviewName(val) {
+            document.getElementById('preview-name-el').innerText = val ? val : "Garment Title";
+        }
+
+        function updatePreviewPrice(val) {
+            const price = parseFloat(val);
+            document.getElementById('preview-price-el').innerText = isNaN(price) ? "₹0.00 / day" : `₹${price.toFixed(2)} / day`;
+        }
+
+        function updatePreviewDesc(val) {
+            const limit = 75;
+            document.getElementById('preview-desc-el').innerText = val ? (val.length > limit ? val.substring(0, limit) + '...' : val) : "Italian fabric velvet custom tailoring...";
+        }
+
+        function updatePreviewTemplate(categoryVal) {
+            const val = (categoryVal || '').toLowerCase();
+            const suitKeywords = ['suit', 'tux', 'blazer', 'sherwani', 'jacket', 'coat', 'men'];
+            let matched = 'gown';
+            for (let i = 0; i < suitKeywords.length; i++) {
+                if (val.includes(suitKeywords[i])) {
+                    matched = 'suit';
+                    break;
+                }
+            }
+            currentCategory = matched;
+            
+            // Only update preview template if no file has been uploaded by the user yet
+            const fileInput = document.getElementById('mock-file-input');
+            if (!fileInput.files || !fileInput.files[0]) {
+                const imgEl = document.getElementById('preview-image-el');
+                imgEl.src = imageAssets[matched];
+            }
+        }
+
+        function simulateFileUpload() {
+            document.getElementById('mock-file-input').click();
+        }
+
+        function handleFileSelect(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Security Error: Only image files (PNG, JPG, JPEG, GIF, WEBP) are allowed.');
+                    input.value = ''; // Clear selection
+                    document.getElementById('upload-status').innerText = 'Select files or drag & drop';
+                    document.getElementById('upload-status').style.color = '';
+                    return;
+                }
+                const statusEl = document.getElementById('upload-status');
+                statusEl.innerText = `File selected: ${file.name}`;
+                statusEl.style.color = 'var(--accent-color)';
+                
+                // Show uploaded image in live preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('preview-image-el').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+</body>
+</html>

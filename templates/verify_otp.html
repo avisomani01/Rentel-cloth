@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Verify OTP - Closet Share</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .form-container {
+            max-width: 450px;
+            margin: 150px auto;
+            background: var(--card-bg);
+            padding: 3rem;
+            border-radius: 20px;
+            border: 1px solid var(--card-border);
+            text-align: center;
+            backdrop-filter: blur(15px);
+        }
+        .form-container h2 {
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+        }
+        .form-container p {
+            color: #a0a0a0;
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+        .otp-inputs {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+        .otp-field {
+            width: 50px;
+            height: 60px;
+            font-size: 1.5rem;
+            text-align: center;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            background: rgba(255,255,255,0.05);
+            color: white;
+            font-weight: 700;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .otp-field:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 15px var(--accent-glow);
+            background: rgba(255,255,255,0.08);
+        }
+        .flashes {
+            color: #ff6b6b;
+            list-style: none;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            padding: 0;
+        }
+        .timer {
+            color: #a0a0a0;
+            font-size: 0.9rem;
+            margin-top: 1.5rem;
+        }
+        .resend-btn {
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: underline;
+            padding: 0;
+            font-size: 0.9rem;
+        }
+        .resend-btn:disabled {
+            color: #555;
+            cursor: not-allowed;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">RC.</div>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('index') }}">Home</a></li>
+        </ul>
+    </nav>
+
+    <div class="form-container fade-in visible">
+        <h2>Enter Verification Code</h2>
+        <p>A 6-digit verification code has been sent to <strong>{{ email }}</strong>. It will expire in 5 minutes.</p>
+
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul class="flashes">
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" id="otp-form">
+            <!-- Hidden field to hold final reconstructed OTP -->
+            <input type="hidden" name="otp" id="otp-value">
+
+            <div class="otp-inputs">
+                <input type="text" class="otp-field" maxlength="1" pattern="[0-9]" inputmode="numeric" id="otp-1" autocomplete="off">
+                <input type="text" class="otp-field" maxlength="1" pattern="[0-9]" inputmode="numeric" id="otp-2" autocomplete="off">
+                <input type="text" class="otp-field" maxlength="1" pattern="[0-9]" inputmode="numeric" id="otp-3" autocomplete="off">
+                <input type="text" class="otp-field" maxlength="1" pattern="[0-9]" inputmode="numeric" id="otp-4" autocomplete="off">
+                <input type="text" class="otp-field" maxlength="1" pattern="[0-9]" inputmode="numeric" id="otp-5" autocomplete="off">
+                <input type="text" class="otp-field" maxlength="1" pattern="[0-9]" inputmode="numeric" id="otp-6" autocomplete="off">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; border-radius: 12px; font-weight: 700; font-size: 1rem;">Verify Account</button>
+        </form>
+
+        <form method="POST" style="margin-top: 1.5rem;">
+            <div class="timer">
+                Didn't get the code? 
+                <button type="submit" name="action" value="resend" id="resend-link" class="resend-btn" disabled>Resend OTP</button>
+                <span id="cooldown-timer">(60s)</span>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const fields = document.querySelectorAll('.otp-field');
+        const form = document.getElementById('otp-form');
+        const otpValueInput = document.getElementById('otp-value');
+
+        // Focus handling for 6 inputs
+        fields.forEach((field, index) => {
+            field.addEventListener('input', (e) => {
+                // Ensure only digits are typed
+                e.target.value = e.target.value.replace(/\D/g, '');
+                const value = e.target.value;
+                if (value.length === 1 && index < fields.length - 1) {
+                    fields[index + 1].focus();
+                }
+                combineOtp();
+            });
+
+            field.addEventListener('keypress', (e) => {
+                if (!/[0-9]/.test(e.key)) {
+                    e.preventDefault();
+                }
+            });
+
+            field.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && field.value.length === 0 && index > 0) {
+                    fields[index - 1].focus();
+                }
+            });
+            
+            // Paste event support
+            field.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pasteData = (e.clipboardData || window.clipboardData).getData('text').trim();
+                if (/^\d{6}$/.test(pasteData)) {
+                    fields.forEach((f, i) => {
+                        f.value = pasteData[i];
+                    });
+                    combineOtp();
+                    fields[5].focus();
+                }
+            });
+        });
+
+        function combineOtp() {
+            let combined = '';
+            fields.forEach(field => {
+                combined += field.value;
+            });
+            otpValueInput.value = combined;
+        }
+
+        form.addEventListener('submit', (e) => {
+            combineOtp();
+            if (otpValueInput.value.length !== 6) {
+                e.preventDefault();
+                alert('Please enter all 6 digits.');
+            }
+        });
+
+        // Cooldown timer logic for resending
+        let timeLeft = 60;
+        const resendBtn = document.getElementById('resend-link');
+        const timerSpan = document.getElementById('cooldown-timer');
+
+        function startTimer() {
+            const interval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    resendBtn.disabled = false;
+                    timerSpan.textContent = '';
+                } else {
+                    timerSpan.textContent = `(${timeLeft}s)`;
+                }
+            }, 1000);
+        }
+
+        startTimer();
+    </script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment Successful - Rented Clothes</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=2">
+    <style>
+        .success-container {
+            max-width: 600px;
+            margin: 150px auto;
+            background: var(--card-bg);
+            padding: 4rem;
+            border-radius: 20px;
+            border: 1px solid #4CAF50;
+            text-align: center;
+        }
+        .success-container h2 {
+            margin-bottom: 1rem;
+            color: #4CAF50;
+            font-size: 2.5rem;
+        }
+        .success-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container fade-in visible">
+        <div class="success-icon">✓</div>
+        <h2>Payment Successful!</h2>
+        <p style="color: #a0a0a0; margin-bottom: 2rem;">Your order for the <strong>{{ dress.name }}</strong> has been confirmed. It will be dry-cleaned and shipped shortly.</p>
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Return to Collection</a>
+    </div>
+</body>
+</html>

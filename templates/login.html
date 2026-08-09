@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login / Register - Rented Clothes</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .form-container {
+            max-width: 400px;
+            margin: 150px auto;
+            background: var(--card-bg);
+            padding: 3rem;
+            border-radius: 20px;
+            border: 1px solid var(--card-border);
+            text-align: center;
+        }
+        .form-container h2 {
+            margin-bottom: 2rem;
+            color: var(--accent-color);
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #a0a0a0;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 10px;
+            border: 1px solid var(--card-border);
+            background: rgba(255,255,255,0.05);
+            color: white;
+        }
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+        .flashes {
+            color: #ff6b6b;
+            list-style: none;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">RC.</div>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('index') }}">Home</a></li>
+        </ul>
+    </nav>
+
+    <div class="form-container fade-in visible">
+        <h2 id="form-title">Welcome Back</h2>
+        
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul class="flashes">
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" id="auth-form">
+            <div class="form-group">
+                <label id="username-label">Username / Email</label>
+                <input type="text" name="username" required placeholder="Enter username or email" style="outline: none; transition: border-color 0.3s;">
+            </div>
+            
+            <div class="form-group" id="email-group" style="display: none;">
+                <label>Email</label>
+                <input type="email" name="email" id="email-input" placeholder="Enter your email address" style="outline: none; transition: border-color 0.3s;">
+            </div>
+            
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" required placeholder="Enter password" style="outline: none; transition: border-color 0.3s;">
+            </div>
+            
+            <div id="forgot-password-link" style="text-align: right; margin-top: -0.5rem; margin-bottom: 1.5rem;">
+                <a href="{{ url_for('forgot_password') }}" style="color: var(--accent-color); text-decoration: none; font-size: 0.85rem; transition: color 0.3s;">Forgot Password?</a>
+            </div>
+            
+            <div class="form-actions" style="margin-top: 1rem;">
+                <button type="submit" id="primary-btn" name="action" value="login" class="btn btn-primary" style="width: 100%; border-radius: 12px; font-weight: 700; font-size: 1rem;">Login</button>
+            </div>
+            
+            <div style="margin-top: 2rem; text-align: center;">
+                <span id="toggle-text" style="color: #a0a0a0; font-size: 0.9rem;">Don't have an account? </span>
+                <a href="#" id="toggle-mode-link" style="color: var(--accent-color); text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: opacity 0.2s;">Register</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const formTitle = document.getElementById('form-title');
+        const emailGroup = document.getElementById('email-group');
+        const emailInput = document.getElementById('email-input');
+        const usernameLabel = document.getElementById('username-label');
+        const forgotPasswordLink = document.getElementById('forgot-password-link');
+        const primaryBtn = document.getElementById('primary-btn');
+        const toggleText = document.getElementById('toggle-text');
+        const toggleModeLink = document.getElementById('toggle-mode-link');
+        
+        let isLoginMode = true;
+        
+        toggleModeLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            isLoginMode = !isLoginMode;
+            
+            // CSS transition simulation
+            const container = document.querySelector('.form-container');
+            container.style.opacity = 0;
+            container.style.transform = 'translateY(10px)';
+            container.style.transition = 'all 0.25s ease';
+            
+            setTimeout(() => {
+                if (isLoginMode) {
+                    formTitle.textContent = 'Welcome Back';
+                    emailGroup.style.display = 'none';
+                    emailInput.required = false;
+                    usernameLabel.textContent = 'Username / Email';
+                    forgotPasswordLink.style.display = 'block';
+                    primaryBtn.textContent = 'Login';
+                    primaryBtn.value = 'login';
+                    toggleText.textContent = "Don't have an account? ";
+                    toggleModeLink.textContent = 'Register';
+                } else {
+                    formTitle.textContent = 'Create Account';
+                    emailGroup.style.display = 'block';
+                    emailInput.required = true;
+                    usernameLabel.textContent = 'Username';
+                    forgotPasswordLink.style.display = 'none';
+                    primaryBtn.textContent = 'Register';
+                    primaryBtn.value = 'register';
+                    toggleText.textContent = 'Already have an account? ';
+                    toggleModeLink.textContent = 'Login';
+                }
+                container.style.opacity = 1;
+                container.style.transform = 'translateY(0)';
+            }, 250);
+        });
+
+        // Add focus effect on fields
+        const inputs = document.querySelectorAll('.form-group input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.style.borderColor = 'var(--accent-color)';
+                input.style.boxShadow = '0 0 10px rgba(201, 162, 101, 0.2)';
+            });
+            input.addEventListener('blur', () => {
+                input.style.borderColor = 'var(--card-border)';
+                input.style.boxShadow = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

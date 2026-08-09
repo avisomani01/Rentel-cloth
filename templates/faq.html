@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ & Support - Rented Clothes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=2">
+    <style>
+        .faq-wrapper {
+            max-width: 800px;
+            margin: 120px auto 80px;
+            padding: 0 2rem;
+        }
+
+        .faq-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .faq-header h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .faq-header h1 span {
+            color: var(--accent-color);
+            font-style: italic;
+        }
+
+        .faq-header p {
+            color: #a0a0a0;
+            font-size: 1.1rem;
+        }
+
+        .faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .faq-item {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .faq-item:hover {
+            border-color: rgba(201, 162, 101, 0.3);
+        }
+
+        .faq-question {
+            padding: 1.5rem 2rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.15rem;
+            font-weight: 600;
+            user-select: none;
+            transition: color 0.3s;
+        }
+
+        .faq-question:hover {
+            color: var(--accent-color);
+        }
+
+        .faq-icon {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+            transition: transform 0.3s ease;
+            line-height: 1;
+        }
+
+        .faq-item.open .faq-icon {
+            transform: rotate(45deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), padding 0.4s ease;
+            padding: 0 2rem;
+            color: #a0a0a0;
+            line-height: 1.8;
+            font-size: 0.95rem;
+        }
+
+        .faq-item.open .faq-answer {
+            padding-bottom: 1.5rem;
+            /* Dynamic height managed in JS */
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="{{ url_for('index') }}" class="logo" style="text-decoration: none; color: white;">RC.</a>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('lend_clothes') }}">Lend Clothes</a></li>
+            {% if current_user.is_authenticated %}
+            <li><a href="{{ url_for('dashboard') }}">Profile</a></li>
+            {% else %}
+            <li><a href="{{ url_for('login') }}">Login</a></li>
+            {% endif %}
+        </ul>
+        <a href="{{ url_for('index') }}" class="btn btn-outline">Explore</a>
+    </nav>
+
+    <div class="faq-wrapper fade-in visible">
+        <div class="faq-header">
+            <h1>Frequently Asked <span>Questions</span></h1>
+            <p>Everything you need to know about our luxury 3D rental services.</p>
+        </div>
+
+        <div class="faq-list">
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>How does the 3D rental process work?</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Simply choose your preferred designer garment from our curated 3D inventory, select your sizing, and input your rental start and end dates. We'll secure your order and ship it to you. At the end of the rental period, place it in the pre-paid return package and hand it to the carrier. We take care of professional dry-cleaning.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>What happens if I accidentally damage the garment?</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>We understand that minor spills or loose threads happen during events. A small damage waiver fee is included in our service rate to cover basic stains and simple repairs. In the event of severe damage (major tears, permanent staining, or loss of the garment), a replacement fee up to the retail value of the dress may be charged as outlined in our rental terms.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>How is cleaning handled? Do I need to dry clean it?</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>No! Please do not attempt to wash or dry clean the garment yourself. We partner with elite eco-friendly dry-cleaning services that specialized in high-end delicate fabrics. Cleaning costs are fully included in the service fee charged during checkout.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>When should I return my rented garment?</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Your return date is specified at checkout and listed in your member dashboard. The garment must be placed in the return packaging and postmarked or dropped off with the shipping provider by 12:00 PM on the day following your final rental date. Late returns are subject to a fee equal to the daily rental rate for each day delayed.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>Can I buy a garment permanently if I love it?</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>While our primary model is renting, we occasionally make selected archive inventory pieces available for purchase. If you fall in love with a piece during your rental, please reach out to customer service, and we can discuss availability and purchase pricing options.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>Are payments secure and is my information private?</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Security is our top priority. Our mock payment gateway simulates actual Stripe API protocols, employing similar interactive visual validations. In production environments, payment processing is encrypted end-to-end via Stripe API, ensuring that your financial data never touches our database directly.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleFaq(el) {
+            const item = el.parentElement;
+            const answer = item.querySelector('.faq-answer');
+            
+            if (item.classList.contains('open')) {
+                item.classList.remove('open');
+                answer.style.maxHeight = '0px';
+            } else {
+                // Close other opened questions
+                document.querySelectorAll('.faq-item').forEach(otherItem => {
+                    otherItem.classList.remove('open');
+                    otherItem.querySelector('.faq-answer').style.maxHeight = '0px';
+                });
+                
+                item.classList.add('open');
+                answer.style.maxHeight = answer.scrollHeight + 'px';
+            }
+        }
+    </script>
+</body>
+</html>

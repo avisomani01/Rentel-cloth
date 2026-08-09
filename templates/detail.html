@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ dress.name }} - Premium Rental</title>
+    <meta name="description" content="{{ dress.description }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Atropos 3D CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/atropos@2.0.2/atropos.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=2">
+    <style>
+        .detail-wrapper {
+            max-width: 1200px;
+            margin: 120px auto 60px;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: start;
+        }
+
+        .detail-media {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: sticky;
+            top: 120px;
+        }
+
+        .detail-atropos {
+            width: 100%;
+            max-width: 450px;
+            height: 550px;
+        }
+
+        .detail-card-inner {
+            border-radius: 24px;
+            border: 1px solid var(--card-border);
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+            padding: 3rem 2rem;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .detail-card-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, var(--accent-glow) 0%, transparent 70%);
+            opacity: 0.5;
+            z-index: 0;
+        }
+
+        .detail-image {
+            width: 90%;
+            height: auto;
+            max-height: 400px;
+            object-fit: contain;
+            filter: drop-shadow(0 30px 40px rgba(0,0,0,0.6));
+            z-index: 2;
+            position: relative;
+        }
+
+        .detail-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1.8rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: #a0a0a0;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--accent-color);
+        }
+
+        .dress-title {
+            font-size: clamp(2.5rem, 4vw, 3.5rem);
+            line-height: 1.1;
+        }
+
+        .dress-meta {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 1.5rem;
+        }
+
+        .price-badge {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        .rating-stars {
+            color: var(--accent-color);
+            letter-spacing: 2px;
+        }
+
+        .dress-desc {
+            font-size: 1.1rem;
+            color: #c0c0c2;
+            line-height: 1.8;
+        }
+
+        .options-section {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .options-title {
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .size-selector {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sizes {
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        .size-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 1px solid var(--card-border);
+            background: transparent;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .size-btn:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .size-btn.active {
+            background: var(--accent-color);
+            color: #000;
+            border-color: var(--accent-color);
+        }
+
+        .size-guide-trigger {
+            background: none;
+            border: none;
+            color: #a0a0a0;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .size-guide-trigger:hover {
+            color: var(--accent-color);
+        }
+
+        .date-picker-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .date-input {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .date-input label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #a0a0a0;
+        }
+
+        .date-input input {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 0.8rem;
+            color: white;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .date-input input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .price-breakdown {
+            border-top: 1px solid var(--card-border);
+            padding-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            font-size: 0.95rem;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            color: #a0a0a0;
+        }
+
+        .price-row.total {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: white;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 0.8rem;
+        }
+
+        .price-row.total span:last-child {
+            color: var(--accent-color);
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(15px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .modal.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: #0f0f11;
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            max-width: 600px;
+            width: 90%;
+            padding: 3rem;
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal.open .modal-content {
+            transform: scale(1);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: none;
+            border: none;
+            color: #a0a0a0;
+            font-size: 2rem;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+            color: white;
+        }
+
+        .size-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            text-align: left;
+        }
+
+        .size-table th, .size-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .size-table th {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        /* Responsive Details */
+        @media (max-width: 900px) {
+            .detail-wrapper {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+                margin-top: 100px;
+            }
+            .detail-media {
+                position: relative;
+                top: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="{{ url_for('index') }}" class="logo" style="text-decoration: none; color: white;">RC.</a>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('lend_clothes') }}">Lend Clothes</a></li>
+            {% if current_user.is_authenticated %}
+            <li><a href="{{ url_for('dashboard') }}">Profile</a></li>
+            {% else %}
+            <li><a href="{{ url_for('login') }}">Login</a></li>
+            {% endif %}
+        </ul>
+        <a href="{{ url_for('index') }}" class="btn btn-outline">Collection</a>
+    </nav>
+
+    <div class="detail-wrapper fade-in visible">
+        <!-- 3D Card Media Display -->
+        <div class="detail-media">
+            <div class="atropos my-atropos detail-atropos">
+                <div class="atropos-scale">
+                    <div class="atropos-rotate">
+                        <div class="atropos-inner detail-card-inner">
+                            <div class="detail-card-bg" data-atropos-offset="-5"></div>
+                            <img src="{{ url_for('static', filename='assets/' ~ dress.image_file) }}" alt="{{ dress.name }}" class="detail-image" data-atropos-offset="8" style="{{ dress.css_filter }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Purchase Information -->
+        <div class="detail-info">
+            <a href="{{ url_for('index') }}" class="back-link">← Back to collection</a>
+            
+            <div>
+                <h1 class="dress-title">{{ dress.name }}</h1>
+                <div class="dress-meta">
+                    <span class="price-badge">₹{{ dress.price_per_day }} <span style="font-size: 1rem; color: #a0a0a0; font-weight: normal;">/ day</span></span>
+                    <span class="rating-stars">★★★★★ <span style="font-size: 0.9rem; color: #a0a0a0;">(12 reviews)</span></span>
+                </div>
+                <div style="margin-top: 1.2rem; font-size: 0.95rem; color: #c0c0c0; display: flex; align-items: center; gap: 0.5rem;">
+                    {% if dress.owner %}
+                    <span style="background: rgba(201,162,101,0.1); padding: 0.35rem 0.85rem; border-radius: 20px; border: 1px solid rgba(201,162,101,0.25); font-size: 0.85rem; color: var(--accent-color);">
+                        Lended by: <strong>{{ dress.owner.username }}</strong>
+                    </span>
+                    {% else %}
+                    <span style="background: rgba(255,255,255,0.05); padding: 0.35rem 0.85rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; color: #fff;">
+                        Listed by: <strong>Closet Share Premium</strong>
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <p class="dress-desc">{{ dress.description }}</p>
+
+            {% if current_user.is_authenticated and dress.owner_id == current_user.id %}
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--card-border); border-radius: 20px; padding: 2.5rem; text-align: center;">
+                <h4 class="options-title" style="color: var(--accent-color); margin-bottom: 1rem;">Your Listed Outfit</h4>
+                <p style="color: #a0a0a0; font-size: 0.95rem; line-height: 1.6; margin-bottom: 0;">This outfit belongs to your wardrobe collection. You cannot rent your own garments.</p>
+            </div>
+            {% else %}
+            <form action="{{ url_for('checkout', dress_id=dress.id) }}" method="GET" class="options-section">
+                <!-- Size Selector -->
+                <div>
+                    <div class="size-selector">
+                        <h4 class="options-title" style="margin-bottom: 0;">Size</h4>
+                        <button type="button" class="size-guide-trigger" onclick="openSizeGuide()">Size Guide</button>
+                    </div>
+                    <div class="sizes" style="margin-top: 0.8rem;">
+                        <button type="button" class="size-btn active" onclick="selectSize(this, 'S')">S</button>
+                        <button type="button" class="size-btn" onclick="selectSize(this, 'M')">M</button>
+                        <button type="button" class="size-btn" onclick="selectSize(this, 'L')">L</button>
+                        <button type="button" class="size-btn" onclick="selectSize(this, 'XL')">XL</button>
+                    </div>
+                    <input type="hidden" name="size" id="selected-size" value="S">
+                </div>
+
+                <!-- Date Range Picker -->
+                <div>
+                    <h4 class="options-title">Select Rental Dates</h4>
+                    <div class="date-picker-group">
+                        <div class="date-input">
+                            <label for="start_date">Start Date</label>
+                            <input type="date" id="start_date" name="start_date" required onchange="calculateRentalCost()">
+                        </div>
+                        <div class="date-input">
+                            <label for="end_date">End Date</label>
+                            <input type="date" id="end_date" name="end_date" required onchange="calculateRentalCost()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dynamic Pricing Summary -->
+                <div class="price-breakdown">
+                    <div class="price-row">
+                        <span>Rental Duration</span>
+                        <span id="rental-days-label">1 Day</span>
+                    </div>
+                    <div class="price-row">
+                        <span>Rate / Day</span>
+                        <span>₹{{ dress.price_per_day }}</span>
+                    </div>
+                    <div class="price-row">
+                        <span>Cleaning & Service Fee</span>
+                        <span>₹15.00</span>
+                    </div>
+                    <div class="price-row total">
+                        <span>Estimated Total</span>
+                        <span id="rental-total-label">₹{{ dress.price_per_day + 15 }}</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; text-align: center;">Book Securely</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Size Guide Modal -->
+    <div class="modal" id="size-guide-modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeSizeGuide()">&times;</button>
+            <h2 style="color: var(--accent-color); margin-bottom: 1rem;">Size Chart Guide</h2>
+            <p style="color: #a0a0a0; margin-bottom: 1.5rem;">Please review our fitting guide to ensure the dress sits perfectly.</p>
+            <table class="size-table">
+                <thead>
+                    <tr>
+                        <th>Size</th>
+                        <th>Bust (in)</th>
+                        <th>Waist (in)</th>
+                        <th>Hips (in)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>S</td>
+                        <td>32 - 34</td>
+                        <td>25 - 27</td>
+                        <td>35 - 37</td>
+                    </tr>
+                    <tr>
+                        <td>M</td>
+                        <td>35 - 37</td>
+                        <td>28 - 30</td>
+                        <td>38 - 40</td>
+                    </tr>
+                    <tr>
+                        <td>L</td>
+                        <td>38 - 40</td>
+                        <td>31 - 33</td>
+                        <td>41 - 43</td>
+                    </tr>
+                    <tr>
+                        <td>XL</td>
+                        <td>41 - 43</td>
+                        <td>34 - 36</td>
+                        <td>44 - 46</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Atropos 3D JS -->
+    <script src="https://unpkg.com/atropos@2.0.2/atropos.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set min date for date inputs to today
+            const today = new Date().toISOString().split('T')[0];
+            const startInput = document.getElementById('start_date');
+            const endInput = document.getElementById('end_date');
+            
+            startInput.min = today;
+            
+            // Set default dates (tomorrow and day after tomorrow)
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+            
+            const dayAfter = new Date();
+            dayAfter.setDate(dayAfter.getDate() + 2);
+            const dayAfterStr = dayAfter.toISOString().split('T')[0];
+            
+            startInput.value = tomorrowStr;
+            endInput.min = tomorrowStr;
+            endInput.value = dayAfterStr;
+            
+            // Initial Atropos Setup
+            Atropos({
+                el: '.detail-atropos',
+                activeOffset: 40,
+                shadowScale: 1.05,
+                highlight: true,
+                rotateXMax: 15,
+                rotateYMax: 15,
+                stretchZ: 10
+            });
+
+            calculateRentalCost();
+        });
+
+        function selectSize(btn, size) {
+            document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('selected-size').value = size;
+        }
+
+        function openSizeGuide() {
+            document.getElementById('size-guide-modal').classList.add('open');
+        }
+
+        function closeSizeGuide() {
+            document.getElementById('size-guide-modal').classList.remove('open');
+        }
+
+        function calculateRentalCost() {
+            const startInput = document.getElementById('start_date');
+            const endInput = document.getElementById('end_date');
+            const ratePerDay = parseFloat('{{ dress.price_per_day }}');
+            
+            // Limit end date to be at least start date + 1 day
+            if (startInput.value) {
+                endInput.min = startInput.value;
+                if (new Date(endInput.value) <= new Date(startInput.value)) {
+                    const newEndDate = new Date(startInput.value);
+                    newEndDate.setDate(newEndDate.getDate() + 1);
+                    endInput.value = newEndDate.toISOString().split('T')[0];
+                }
+            }
+
+            const startVal = new Date(startInput.value);
+            const endVal = new Date(endInput.value);
+            
+            if (isNaN(startVal) || isNaN(endVal)) return;
+
+            const timeDiff = endVal.getTime() - startVal.getTime();
+            let days = Math.ceil(timeDiff / (1000 * 3600 * 24));
+            if (days < 1) days = 1;
+
+            const cleaningFee = 15.0;
+            const subtotal = ratePerDay * days;
+            const grandTotal = subtotal + cleaningFee;
+
+            document.getElementById('rental-days-label').innerText = `${days} Day${days > 1 ? 's' : ''}`;
+            document.getElementById('rental-total-label').innerText = `₹${grandTotal.toFixed(2)}`;
+        }
+        
+        // Close modal on background click
+        window.onclick = function(event) {
+            const modal = document.getElementById('size-guide-modal');
+            if (event.target == modal) {
+                modal.classList.remove('open');
+            }
+        }
+    </script>
+</body>
+</html>

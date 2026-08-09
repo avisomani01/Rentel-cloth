@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rented Clothes - Premium 3D Fashion</title>
+    <meta name="description" content="Discover premium rented fashion with our exclusive interactive 3D collection.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Atropos 3D CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/atropos@2.0.2/atropos.min.css" />
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="{{ url_for('index') }}" class="logo" style="text-decoration: none; color: white;">RC.</a>
+        <ul class="nav-links">
+            <li><a href="#collection">Collection</a></li>
+            <li><a href="{{ url_for('lend_clothes') }}">Lend Clothes</a></li>
+            {% if current_user.is_authenticated %}
+            <li><a href="{{ url_for('dashboard') }}">Profile</a></li>
+            {% if current_user.role == 1 %}
+            <li><a href="{{ url_for('admin_dashboard') }}">Admin</a></li>
+            {% endif %}
+            {% else %}
+            <li><a href="{{ url_for('login') }}">Login</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <!-- Vanta 3D Background Container -->
+    <header id="vanta-bg" class="hero">
+        <div class="hero-content fade-in">
+            <h1 class="hero-title">Redefine Your <span>Style</span></h1>
+            <p class="hero-subtitle">Rent high-end, designer fashion for any occasion. Experience clothing like never before in full 3D.</p>
+            <div class="hero-actions">
+                <a href="#collection" class="btn btn-primary">Start Renting</a>
+            </div>
+        </div>
+        <div class="hero-3d-container fade-in">
+            <!-- We will use Atropos for the hero image too for extreme 3D effect -->
+            <div class="atropos my-atropos hero-atropos">
+                <div class="atropos-scale">
+                    <div class="atropos-rotate">
+                        <div class="atropos-inner">
+                            <img src="{{ url_for('static', filename='assets/hero.png') }}" data-atropos-offset="5" alt="Floating fashion clothing 3D render" class="hero-image">
+                            <div class="glow-effect" data-atropos-offset="-5"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section id="how-it-works" class="how-it-works">
+        <div class="container fade-in">
+            <h2 class="section-title">How It Works</h2>
+            <p class="section-subtitle">A seamless experience to elevate your wardrobe.</p>
+            
+            <div class="steps-container">
+                <div class="step stagger-in">
+                    <div class="step-number">01</div>
+                    <h3>Select</h3>
+                    <p>Browse our curated 3D collection and find the perfect outfit for your next event.</p>
+                </div>
+                <div class="step stagger-in">
+                    <div class="step-number">02</div>
+                    <h3>Receive</h3>
+                    <p>We deliver the freshly dry-cleaned garments directly to your door in premium packaging.</p>
+                </div>
+                <div class="step stagger-in">
+                    <div class="step-number">03</div>
+                    <h3>Return</h3>
+                    <p>Wear it out, turn heads, and simply send it back. We handle all the cleaning.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="collection" class="collection">
+        <div class="container fade-in">
+            <h2 class="section-title">Featured Rentals</h2>
+            <p class="section-subtitle">Deep 3D Multi-Layered Cards. Hover to interact.</p>
+            
+            <div class="cards-container">
+                {% for dress in dresses %}
+                <a href="{{ url_for('detail', dress_id=dress.id) }}" class="collection-card-link stagger-in" style="text-decoration: none; color: inherit; display: block;">
+                    <div class="atropos my-atropos collection-card">
+                        <div class="atropos-scale">
+                            <div class="atropos-rotate">
+                                <div class="atropos-inner card-inner">
+                                    <div class="card-bg" data-atropos-offset="-5"></div>
+                                    <img src="{{ url_for('static', filename='assets/' ~ dress.image_file) }}" alt="{{ dress.name }}" class="card-image" data-atropos-offset="8" style="{{ dress.css_filter }}">
+                                    <div class="card-content" data-atropos-offset="3">
+                                        <h3>{{ dress.name }}</h3>
+                                        <p>{{ dress.description }}</p>
+                                        <div class="card-footer">
+                                            <span class="price">₹{{ dress.price_per_day }} / day</span>
+                                            <span class="btn btn-small">Rent Now</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            
+            {% if has_more %}
+            <div style="text-align: center; margin-top: 5rem;" class="fade-in">
+                <a href="{{ url_for('collection_all') }}" class="btn btn-primary" style="padding: 1rem 3rem;">See More Collection</a>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Lend Wardrobe peer promotion section -->
+    <section id="lend-promo" class="how-it-works" style="background: linear-gradient(to top, transparent, rgba(201, 162, 101, 0.02)); border-top: 1px solid var(--card-border); padding: 5rem 5%;">
+        <div class="container fade-in">
+            <h2 class="section-title">Lend Your Wardrobe</h2>
+            <p class="section-subtitle">Turn your unused premium outfits into recurring revenue.</p>
+            
+            <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 24px; padding: 4rem 3rem; display: flex; align-items: center; justify-content: space-between; gap: 3rem; flex-wrap: wrap;">
+                <div style="flex: 1.5; min-width: 300px;">
+                    <h3 style="font-size: 2rem; margin-bottom: 1rem; font-family: var(--font-serif); color: var(--accent-color);">Earn from Your Outfits</h3>
+                    <p style="color: #a0a0a0; margin-bottom: 2rem; font-size: 1.05rem; line-height: 1.8;">
+                        Do you have designer gowns, tailored tuxedos, or premium sherwanis sitting in your closet? List them in our exclusive collection! Set your rental pricing, and let us handle dry cleaning, shipping, and insurance. Track your earnings instantly in your dashboard.
+                    </p>
+                    <a href="{{ url_for('lend_clothes') }}" class="btn btn-primary" style="box-shadow: 0 0 20px rgba(201, 162, 101, 0.3);">List Your Outfit Now</a>
+                </div>
+                <div style="flex: 1; min-width: 250px; display: flex; flex-direction: column; gap: 1.5rem;">
+                    <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                        <span style="background: rgba(201,162,101,0.1); color: var(--accent-color); font-weight: 800; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.95rem;">✓</span>
+                        <div>
+                            <h4 style="color: white; margin-bottom: 0.25rem;">Free Listing & Insurance</h4>
+                            <p style="color: #a0a0a0; font-size: 0.9rem;">We protect your garments and list them for free.</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                        <span style="background: rgba(201,162,101,0.1); color: var(--accent-color); font-weight: 800; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.95rem;">✓</span>
+                        <div>
+                            <h4 style="color: white; margin-bottom: 0.25rem;">Professional Care</h4>
+                            <p style="color: #a0a0a0; font-size: 0.9rem;">Your clothes are dry-cleaned by eco-friendly specialists after each rental.</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                        <span style="background: rgba(201,162,101,0.1); color: var(--accent-color); font-weight: 800; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.95rem;">✓</span>
+                        <div>
+                            <h4 style="color: white; margin-bottom: 0.25rem;">Direct Earnings</h4>
+                            <p style="color: #a0a0a0; font-size: 0.9rem;">Receive secure deposits directly to your account via UPI.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="testimonials" class="testimonials">
+        <div class="container fade-in">
+            <h2 class="section-title">What They Say</h2>
+            <p class="section-subtitle">Real experiences from our community.</p>
+            <div class="testimonial-grid">
+                <div class="testimonial-card stagger-in">
+                    <div class="stars">★★★★★</div>
+                    <p>"The 3D preview on the site is exactly what you get. The Midnight Gala Gown was perfect."</p>
+                    <h4>- Sarah J.</h4>
+                </div>
+                <div class="testimonial-card stagger-in">
+                    <div class="stars">★★★★★</div>
+                    <p>"I rented a tailored suit for my wedding. Incredible quality and effortless return process."</p>
+                    <h4>- Michael T.</h4>
+                </div>
+                <div class="testimonial-card stagger-in">
+                    <div class="stars">★★★★★</div>
+                    <p>"Sustainable fashion without compromising on luxury. This is the future of dressing up."</p>
+                    <h4>- Elena R.</h4>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content fade-in">
+            <div class="footer-col">
+                <div class="footer-logo">Rented Clothes.</div>
+                <p>Sustainable, premium, and stunning fashion at your fingertips.</p>
+            </div>
+            <div class="footer-col">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="#vanta-bg">Home</a></li>
+                    <li><a href="#collection">Collection</a></li>
+                    <li><a href="{{ url_for('faq') }}">FAQ</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Newsletter</h3>
+                <p>Get 15% off your first rental.</p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="Your email address">
+                    <button type="submit" class="btn btn-primary">Subscribe</button>
+                </form>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Rented Clothes. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Three.js (Required for Vanta) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <!-- Vanta.js Fog Effect -->
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.fog.min.js"></script>
+    
+    <!-- Atropos 3D JS -->
+    <script src="https://unpkg.com/atropos@2.0.2/atropos.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

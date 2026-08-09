@@ -1,13 +1,11 @@
 import os
 import re
 import secrets
-import smtplib
 import hmac
 import json
 import urllib.request
+import urllib.error
 from datetime import datetime, timedelta
-from email.mime.text import MIMEText
-from email.header import Header
 from flask import Flask, render_template, redirect, url_for, request, flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
@@ -25,17 +23,10 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'supersecret_premium_key
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
-# Dummy SMTP Email Server Configuration defaults
-# Users can modify these to use real email servers (e.g. Gmail)
-app.config['SMTP_SERVER'] = os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
-app.config['SMTP_PORT'] = int(os.environ.get('SMTP_PORT', 587))
-app.config['SMTP_USERNAME'] = os.environ.get('SMTP_USERNAME', 'dummy-sender@clothesrent.com')
-app.config['SMTP_PASSWORD'] = os.environ.get('SMTP_PASSWORD', 'dummy-password-123')
-app.config['SMTP_SENDER'] = os.environ.get('SMTP_SENDER', 'no-reply@clothesrent.com')
-
-# Resend API Configuration for production/free web service deployments
-app.config['RESEND_API_KEY'] = os.environ.get('RESEND_API_KEY')
-app.config['RESEND_SENDER'] = os.environ.get('RESEND_SENDER', 'onboarding@resend.dev')
+# Brevo API Configuration
+app.config['BREVO_API_KEY'] = os.environ.get('BREVO_API_KEY')
+app.config['BREVO_SENDER_EMAIL'] = os.environ.get('BREVO_SENDER_EMAIL', 'no-reply@closetshare.com')
+app.config['BREVO_SENDER_NAME'] = os.environ.get('BREVO_SENDER_NAME', 'Closet Share')
 
 def generate_otp():
     # Cryptographically secure random 6 digit OTP
@@ -43,10 +34,15 @@ def generate_otp():
     return "".join(digits)
 
 def send_otp_email(to_email, otp, purpose="register"):
-    resend_api_key = app.config.get('RESEND_API_KEY')
-    resend_sender = app.config.get('RESEND_SENDER') or 'onboarding@resend.dev'
+    brevo_api_key = os.environ.get('BREVO_API_KEY') or app.config.get('BREVO_API_KEY')
+    brevo_sender_email = os.environ.get('BREVO_SENDER_EMAIL') or app.config.get('BREVO_SENDER_EMAIL') or 'no-reply@closetshare.com'
+    brevo_sender_name = os.environ.get('BREVO_SENDER_NAME') or app.config.get('BREVO_SENDER_NAME') or 'Closet Share'
     
-    subject = f"OTP Code for Closet Share - {purpose.capitalize()}"
+    if purpose == "reset":
+        subject = "OTP Code for Closet Share - Reset"
+    else:
+        subject = "OTP Code for Closet Share - Register"
+        
     body = f"""Hello,
 
 Your verification code (OTP) for Closet Share is:
@@ -61,82 +57,61 @@ If you did not request this code, you can safely ignore this email.
 Warm regards,
 Closet Share Team
 """
-    # Attempt to send using Resend HTTP API if configured
-    if resend_api_key:
-        try:
-            url = "https://api.resend.com/emails"
-            headers = {
-                "Authorization": f"Bearer {resend_api_key}",
-                "Content-Type": "application/json"
+    
+    url = "https://api.brevo.com/v3/smtp/email"
+    headers = {
+        "api-key": brevo_api_key or "",
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    }
+    
+    data = {
+        "sender": {
+            "name": brevo_sender_name,
+            "email": brevo_sender_email
+        },
+        "to": [
+            {
+                "email": to_email
             }
-            # Resend requires a validated sender, defaulting to onboarding@resend.dev for developer testing
-            data = {
-                "from": resend_sender,
-                "to": [to_email],
-                "subject": subject,
-                "text": body
-            }
-            req = urllib.request.Request(
-                url,
-                data=json.dumps(data).encode('utf-8'),
-                headers=headers,
-                method='POST'
-            )
-            with urllib.request.urlopen(req, timeout=10) as response:
-                res_body = response.read().decode('utf-8')
-                res_data = json.loads(res_body)
-                if "id" in res_data:
-                    return True
-                else:
-                    raise ValueError(f"Resend response missing ID: {res_data}")
-        except Exception as e:
-            print("\n" + "="*60)
-            print(f"  [RESEND API EMAIL SENDING ERROR]")
-            print(f"  Recipient: {to_email}")
-            print(f"  Subject: {subject}")
-            print(f"  OTP Code: {otp}")
-            print(f"  Error details: {e}")
-            print("="*60 + "\n")
-            # If Resend was explicitly set, we print error but can also try SMTP fallback if available
-
-    # Fallback to standard SMTP
-    smtp_server = app.config.get('SMTP_SERVER')
-    smtp_port = app.config.get('SMTP_PORT')
-    smtp_user = app.config.get('SMTP_USERNAME')
-    smtp_pass = app.config.get('SMTP_PASSWORD')
-    smtp_sender = app.config.get('SMTP_SENDER')
+        ],
+        "subject": subject,
+        "textContent": body
+    }
     
     try:
-        # Check for dummy settings or placeholder credentials
-        is_dummy = (
-            not smtp_user or 
-            not smtp_pass or
-            smtp_user in ('dummy-sender@clothesrent.com', 'your-email@gmail.com') or 
-            smtp_pass in ('dummy-password-123', 'your-gmail-app-password')
-        )
-        if is_dummy:
-            raise ValueError("SMTP credentials are not configured (using dummy or placeholder values).")
+        if not brevo_api_key:
+            raise ValueError("BREVO_API_KEY environment variable is not set.")
             
-        msg = MIMEText(body, 'plain', 'utf-8')
-        msg['Subject'] = Header(subject, 'utf-8')
-        msg['From'] = smtp_sender
-        msg['To'] = to_email
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(data).encode('utf-8'),
+            headers=headers,
+            method='POST'
+        )
         
-        server = smtplib.SMTP(smtp_server, smtp_port, timeout=10)
-        server.ehlo()
-        server.starttls()
-        server.ehlo()
-        server.login(smtp_user, smtp_pass)
-        server.sendmail(smtp_sender, [to_email], msg.as_string())
-        server.close()
-        return True
-    except Exception as e:
-        # Meaningful developer error logging in the console
+        with urllib.request.urlopen(req, timeout=10) as response:
+            return True
+            
+    except urllib.error.HTTPError as e:
+        status_code = e.code
+        try:
+            error_response = e.read().decode('utf-8')
+        except Exception:
+            error_response = "Could not read error response body"
+            
         print("\n" + "="*60)
-        print(f"  [SMTP EMAIL SENDING ERROR / DUMMY MODE]")
+        print(f"  [BREVO API EMAIL SENDING HTTP ERROR]")
         print(f"  Recipient: {to_email}")
-        print(f"  Subject: {subject}")
-        print(f"  OTP Code: {otp}")
+        print(f"  HTTP Status Code: {status_code}")
+        print(f"  Brevo Error Response: {error_response}")
+        print("="*60 + "\n")
+        return False
+        
+    except Exception as e:
+        print("\n" + "="*60)
+        print(f"  [BREVO API EMAIL SENDING GENERAL ERROR]")
+        print(f"  Recipient: {to_email}")
         print(f"  Error details: {e}")
         print("="*60 + "\n")
         return False

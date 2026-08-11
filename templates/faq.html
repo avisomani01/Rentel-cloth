@@ -94,18 +94,35 @@
             padding-bottom: 1.5rem;
             /* Dynamic height managed in JS */
         }
+        <!-- Prevent theme flash -->
+        <script>
+            (function() {
+                const savedTheme = localStorage.getItem('theme') || 'dark';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            })();
+        </script>
     </style>
 </head>
 <body>
     <nav class="navbar">
-        <a href="{{ url_for('index') }}" class="logo" style="text-decoration: none; color: white;">RC.</a>
-        <ul class="nav-links">
+        <a href="{{ url_for('index') }}" class="logo" style="text-decoration: none; color: var(--text-color);">
+            <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;">
+                <path d="M16 9C18 9 19 7.5 19 6.5C19 5.5 17.5 4 16 4C14.5 4 13 5.5 13 6.5" stroke="var(--accent-color)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M5 14L16 24L27 14" stroke="var(--accent-color)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M10 14L16 20L22 14" stroke="var(--accent-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>VogueVault</span>
+        </a>
+        <ul class="nav-links" style="align-items: center; display: flex; gap: 2.5rem;">
             <li><a href="{{ url_for('lend_clothes') }}">Lend Clothes</a></li>
             {% if current_user.is_authenticated %}
             <li><a href="{{ url_for('dashboard') }}">Profile</a></li>
             {% else %}
             <li><a href="{{ url_for('login') }}">Login</a></li>
             {% endif %}
+            <li>
+                <button class="theme-toggle-btn" aria-label="Toggle theme">☀️</button>
+            </li>
         </ul>
         <a href="{{ url_for('index') }}" class="btn btn-outline">Explore</a>
     </nav>
@@ -199,5 +216,7 @@
             }
         }
     </script>
+    <!-- Custom JS for theme toggling -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

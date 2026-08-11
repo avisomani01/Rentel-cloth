@@ -338,25 +338,37 @@
                 top: 0;
             }
         }
+        <!-- Prevent theme flash -->
+        <script>
+            (function() {
+                const savedTheme = localStorage.getItem('theme') || 'dark';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            })();
+        </script>
     </style>
 </head>
 <body>
     <nav class="navbar">
-        <a href="{{ url_for('index') }}" class="logo" style="text-decoration: none; color: white;">RC.</a>
-        <ul class="nav-links">
+        <a href="{{ url_for('index') }}" class="logo" style="text-decoration: none; display: flex; align-items: center;" title="Go to Home">
+            <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="3D Logo" style="height: 42px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 10px rgba(0,0,0,0.4));">
+        </a>
+        <ul class="nav-links" style="align-items: center; display: flex; gap: 2.5rem;">
             <li><a href="{{ url_for('lend_clothes') }}">Lend Clothes</a></li>
             {% if current_user.is_authenticated %}
             <li><a href="{{ url_for('dashboard') }}">Profile</a></li>
             {% else %}
             <li><a href="{{ url_for('login') }}">Login</a></li>
             {% endif %}
+            <li>
+                <button class="theme-toggle-btn" aria-label="Toggle theme">☀️</button>
+            </li>
         </ul>
         <a href="{{ url_for('index') }}" class="btn btn-outline">Collection</a>
     </nav>
 
     <div class="detail-wrapper fade-in visible">
         <!-- 3D Card Media Display -->
-        <div class="detail-media">
+        <div class="detail-media" style="flex-direction: column; gap: 1.5rem;">
             <div class="atropos my-atropos detail-atropos">
                 <div class="atropos-scale">
                     <div class="atropos-rotate">
@@ -367,6 +379,14 @@
                     </div>
                 </div>
             </div>
+            <a href="{{ url_for('dress_showcase', dress_id=dress.id) }}" class="btn btn-outline 3d-showcase-btn" style="width: 100%; max-width: 450px; display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem; border-color: var(--accent-color); color: var(--accent-color); font-weight: 700; border-radius: 30px; padding: 0.8rem 2.2rem; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem; transition: var(--transition);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Virtual 3D Interactive Tour
+            </a>
         </div>
 
         <!-- Product Purchase Information -->
@@ -594,5 +614,7 @@
             }
         }
     </script>
+    <!-- Custom JS for theme toggling -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

@@ -1,24 +1,66 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    // 1. Initialize Vanta.js 3D Background on the Hero section
-    // We use the FOG effect for a premium, moody aesthetic
-    if (typeof VANTA !== 'undefined') {
-        VANTA.FOG({
+    let vantaEffect = null;
+    
+    // 1. Function to initialize or update Vanta.js 3D Background
+    function updateVantaFog(theme) {
+        if (typeof VANTA === 'undefined') return;
+        
+        const isDark = theme === 'dark';
+        const config = {
             el: "#vanta-bg",
             mouseControls: true,
             touchControls: true,
             gyroControls: false,
             minHeight: 200.00,
             minWidth: 200.00,
-            highlightColor: 0xc9a265, // Accent gold
-            midtoneColor: 0x0,
-            lowlightColor: 0x111111,
-            baseColor: 0x050505,
-            blurFactor: 0.60,
-            speed: 1.50,
-            zoom: 1.20
+            highlightColor: isDark ? 0x1e1938 : 0x6c63ff, // Muted indigo vs Indigo
+            midtoneColor: isDark ? 0x0c0b12 : 0xff6b9d,   // Dark charcoal vs Pink
+            lowlightColor: isDark ? 0x060609 : 0xe2e0ff,   // Space black vs Soft lavender
+            baseColor: isDark ? 0x060609 : 0xf8f7ff,       // Match background
+            blurFactor: 0.70,
+            speed: isDark ? 0.80 : 1.20,
+            zoom: 1.10
+        };
+
+        if (document.querySelector("#vanta-bg")) {
+            if (vantaEffect) {
+                // If it already exists, update options dynamically
+                vantaEffect.setOptions(config);
+            } else {
+                // Initialize the effect
+                vantaEffect = VANTA.FOG(config);
+            }
+        }
+    }
+
+    // 2. Initialize Theme and Event Listeners
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateVantaFog(savedTheme);
+
+    const toggleBtns = document.querySelectorAll('.theme-toggle-btn');
+    
+    function updateToggleBtnIcons(theme) {
+        toggleBtns.forEach(btn => {
+            btn.innerHTML = theme === 'dark' ? '☀️' : '🌙';
+            btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
         });
     }
+
+    toggleBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateVantaFog(newTheme);
+            updateToggleBtnIcons(newTheme);
+        });
+    });
+
+    updateToggleBtnIcons(savedTheme);
 
     // 2. Initialize Atropos.js for Deep 3D Cards
     document.querySelectorAll('.my-atropos').forEach((el) => {

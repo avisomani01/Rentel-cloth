@@ -1,13 +1,66 @@
-:root {
-    --bg-color: #050505;
-    --text-color: #f5f5f7;
-    --accent-color: #c9a265; /* Elegant gold/champagne */
-    --accent-glow: rgba(201, 162, 101, 0.4);
-    --card-bg: rgba(255, 255, 255, 0.03);
-    --card-border: rgba(255, 255, 255, 0.08);
+:root, [data-theme="dark"] {
+    --bg-color: #060609;     /* Deep luxury black */
+    --text-color: #f3f3f5;   /* Refined soft white */
+    --accent-color: #d4af37; /* Champagne Gold */
+    --accent-glow: rgba(212, 175, 55, 0.25);
+    --primary-color: #231e3d; /* Space indigo */
+    --secondary-color: #1a1a24; /* Slate card background */
+    --cyan-color: #c5a880;   /* Muted warm gold */
+    --card-bg: rgba(26, 26, 36, 0.45);
+    --card-border: rgba(212, 175, 55, 0.12);
+    
+    --nav-bg: rgba(6, 6, 9, 0.75);
+    --footer-bg: #030305;
+    --card-content-bg: rgba(6, 6, 9, 0.65);
+    --card-content-border: rgba(212, 175, 55, 0.08);
+    --text-muted: #9fa0a6;   /* Clean light gray */
+    --btn-primary-text: #060609;
     
     --font-sans: 'Outfit', sans-serif;
     --font-serif: 'Playfair Display', serif;
+}
+
+[data-theme="light"] {
+    --bg-color: #f8f7ff;
+    --text-color: #20202a;
+    --accent-color: #6c63ff; /* Indigo */
+    --accent-glow: rgba(108, 99, 255, 0.4);
+    --primary-color: #6c63ff;
+    --secondary-color: #ff6b9d; /* Pink */
+    --cyan-color: #00c2a8; /* Mint/Teal */
+    --card-bg: rgba(255, 255, 255, 0.85);
+    --card-border: rgba(108, 99, 255, 0.08);
+    
+    --nav-bg: rgba(248, 247, 255, 0.8);
+    --footer-bg: #ffffff;
+    --card-content-bg: rgba(255, 255, 255, 0.9);
+    --card-content-border: rgba(0, 0, 0, 0.05);
+    --text-muted: #606070;
+    --btn-primary-text: #ffffff;
+}
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.3s, transform 0.3s;
+    color: var(--text-color);
+}
+
+.theme-toggle-btn:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    transform: scale(1.1);
+}
+
+[data-theme="light"] .theme-toggle-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 * {
@@ -40,20 +93,26 @@ h1, h2, h3, h4 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.5rem 5%;
+    padding: 1rem 6%;
     position: fixed;
     width: 100%;
     top: 0;
     z-index: 100;
-    backdrop-filter: blur(15px);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--card-border);
-    background: rgba(5, 5, 5, 0.7);
+    background: var(--nav-bg);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
 }
 
 .logo {
-    font-size: 1.8rem;
-    font-weight: 800;
-    letter-spacing: 2px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 }
 
 .nav-links {
@@ -65,14 +124,17 @@ h1, h2, h3, h4 {
 .nav-links a {
     text-decoration: none;
     color: var(--text-color);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: color 0.3s ease;
+    letter-spacing: 1.5px;
+    transition: color 0.3s ease, opacity 0.3s ease;
+    opacity: 0.85;
 }
 
 .nav-links a:hover {
     color: var(--accent-color);
+    opacity: 1;
 }
 
 /* Buttons */
@@ -102,14 +164,16 @@ h1, h2, h3, h4 {
 }
 
 .btn-primary {
-    background: var(--accent-color);
-    color: #000;
-    box-shadow: 0 0 20px var(--accent-glow);
+    background: linear-gradient(135deg, var(--accent-color), var(--cyan-color));
+    color: var(--btn-primary-text);
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.15);
+    font-weight: 700;
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 0 30px var(--accent-glow);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3);
+    filter: brightness(1.05);
 }
 
 .btn-small {
@@ -125,7 +189,8 @@ h1, h2, h3, h4 {
 
 .btn-small:hover {
     background: var(--accent-color);
-    color: #000;
+    color: var(--btn-primary-text);
+    box-shadow: 0 0 15px var(--accent-glow);
 }
 
 /* Hero Section */
@@ -157,7 +222,7 @@ h1, h2, h3, h4 {
 
 .hero-subtitle {
     font-size: 1.2rem;
-    color: #a0a0a0;
+    color: var(--text-muted);
     max-width: 500px;
     margin-bottom: 2.5rem;
 }
@@ -218,13 +283,13 @@ section {
 
 .section-subtitle {
     text-align: center;
-    color: #a0a0a0;
+    color: var(--text-muted);
     margin-bottom: 4rem;
 }
 
 /* How It Works Section */
 .how-it-works {
-    background: linear-gradient(to bottom, transparent, rgba(201, 162, 101, 0.03));
+    background: linear-gradient(to bottom, transparent, rgba(114, 9, 183, 0.04));
 }
 
 .steps-container {
@@ -252,7 +317,7 @@ section {
 .step-number {
     font-family: var(--font-serif);
     font-size: 4rem;
-    color: rgba(201, 162, 101, 0.2);
+    color: rgba(0, 240, 255, 0.25);
     font-weight: 800;
     line-height: 1;
     margin-bottom: 1rem;
@@ -264,7 +329,7 @@ section {
 }
 
 .step p {
-    color: #a0a0a0;
+    color: var(--text-muted);
     font-size: 0.95rem;
 }
 
@@ -324,10 +389,10 @@ section {
 }
 
 .card-content {
-    background: rgba(0,0,0,0.5);
+    background: var(--card-content-bg);
     padding: 1rem;
     border-radius: 15px;
-    border: 1px solid rgba(255,255,255,0.05);
+    border: 1px solid var(--card-content-border);
     position: relative;
     z-index: 10;
 }
@@ -338,7 +403,7 @@ section {
 }
 
 .card-content p {
-    color: #a0a0a0;
+    color: var(--text-muted);
     font-size: 0.85rem;
     margin-bottom: 1rem;
 }
@@ -356,7 +421,7 @@ section {
 
 /* Testimonials */
 .testimonials {
-    background: linear-gradient(to top, rgba(201, 162, 101, 0.05), transparent);
+    background: linear-gradient(to top, rgba(114, 9, 183, 0.05), transparent);
 }
 
 .testimonial-grid {
@@ -392,7 +457,7 @@ section {
 /* Footer */
 footer {
     padding: 5rem 5% 2rem;
-    background: #000;
+    background: var(--footer-bg);
     border-top: 1px solid var(--card-border);
 }
 

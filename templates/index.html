@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rented Clothes - Premium 3D Fashion</title>
+    <title>VogueVault - Premium P2P Fashion Rentals</title>
     <meta name="description" content="Discover premium rented fashion with our exclusive interactive 3D collection.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,12 +13,22 @@
     <link rel="stylesheet" href="https://unpkg.com/atropos@2.0.2/atropos.min.css" />
     
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3">
+    
+    <!-- Prevent theme flash -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
 </head>
 <body>
     <nav class="navbar">
-        <a href="{{ url_for('index') }}" class="logo" style="text-decoration: none; color: white;">RC.</a>
-        <ul class="nav-links">
-            <li><a href="#collection">Collection</a></li>
+        <a href="{{ url_for('index') }}" class="logo" style="text-decoration: none; display: flex; align-items: center;" title="Go to Home">
+            <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="3D Logo" style="height: 42px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 10px rgba(0,0,0,0.4));">
+        </a>
+        <ul class="nav-links" style="align-items: center; display: flex; gap: 2.5rem;">
+            <li><a href="{{ url_for('collection_all') }}">Collection</a></li>
             <li><a href="{{ url_for('lend_clothes') }}">Lend Clothes</a></li>
             {% if current_user.is_authenticated %}
             <li><a href="{{ url_for('dashboard') }}">Profile</a></li>
@@ -28,6 +38,9 @@
             {% else %}
             <li><a href="{{ url_for('login') }}">Login</a></li>
             {% endif %}
+            <li>
+                <button class="theme-toggle-btn" aria-label="Toggle theme">☀️</button>
+            </li>
         </ul>
     </nav>
 
@@ -37,127 +50,14 @@
             <h1 class="hero-title">Redefine Your <span>Style</span></h1>
             <p class="hero-subtitle">Rent high-end, designer fashion for any occasion. Experience clothing like never before in full 3D.</p>
             <div class="hero-actions">
-                <a href="#collection" class="btn btn-primary">Start Renting</a>
+                <a href="{{ url_for('collection_all') }}" class="btn btn-primary">Start Renting</a>
             </div>
         </div>
-        <div class="hero-3d-container fade-in">
-            <!-- We will use Atropos for the hero image too for extreme 3D effect -->
-            <div class="atropos my-atropos hero-atropos">
-                <div class="atropos-scale">
-                    <div class="atropos-rotate">
-                        <div class="atropos-inner">
-                            <img src="{{ url_for('static', filename='assets/hero.png') }}" data-atropos-offset="5" alt="Floating fashion clothing 3D render" class="hero-image">
-                            <div class="glow-effect" data-atropos-offset="-5"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="hero-3d-container fade-in" style="width: 100%; height: 500px; position: relative;">
+            <canvas id="hero-3d-canvas" style="width: 100%; height: 100%; display: block; z-index: 5; position: relative;"></canvas>
+            <div id="hero-loader" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: var(--font-serif); font-size: 1.2rem; color: var(--accent-color); pointer-events: none; z-index: 1;">Loading 3D Model...</div>
         </div>
     </header>
-
-    <section id="how-it-works" class="how-it-works">
-        <div class="container fade-in">
-            <h2 class="section-title">How It Works</h2>
-            <p class="section-subtitle">A seamless experience to elevate your wardrobe.</p>
-            
-            <div class="steps-container">
-                <div class="step stagger-in">
-                    <div class="step-number">01</div>
-                    <h3>Select</h3>
-                    <p>Browse our curated 3D collection and find the perfect outfit for your next event.</p>
-                </div>
-                <div class="step stagger-in">
-                    <div class="step-number">02</div>
-                    <h3>Receive</h3>
-                    <p>We deliver the freshly dry-cleaned garments directly to your door in premium packaging.</p>
-                </div>
-                <div class="step stagger-in">
-                    <div class="step-number">03</div>
-                    <h3>Return</h3>
-                    <p>Wear it out, turn heads, and simply send it back. We handle all the cleaning.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="collection" class="collection">
-        <div class="container fade-in">
-            <h2 class="section-title">Featured Rentals</h2>
-            <p class="section-subtitle">Deep 3D Multi-Layered Cards. Hover to interact.</p>
-            
-            <div class="cards-container">
-                {% for dress in dresses %}
-                <a href="{{ url_for('detail', dress_id=dress.id) }}" class="collection-card-link stagger-in" style="text-decoration: none; color: inherit; display: block;">
-                    <div class="atropos my-atropos collection-card">
-                        <div class="atropos-scale">
-                            <div class="atropos-rotate">
-                                <div class="atropos-inner card-inner">
-                                    <div class="card-bg" data-atropos-offset="-5"></div>
-                                    <img src="{{ url_for('static', filename='assets/' ~ dress.image_file) }}" alt="{{ dress.name }}" class="card-image" data-atropos-offset="8" style="{{ dress.css_filter }}">
-                                    <div class="card-content" data-atropos-offset="3">
-                                        <h3>{{ dress.name }}</h3>
-                                        <p>{{ dress.description }}</p>
-                                        <div class="card-footer">
-                                            <span class="price">₹{{ dress.price_per_day }} / day</span>
-                                            <span class="btn btn-small">Rent Now</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-                {% endfor %}
-            </div>
-            
-            {% if has_more %}
-            <div style="text-align: center; margin-top: 5rem;" class="fade-in">
-                <a href="{{ url_for('collection_all') }}" class="btn btn-primary" style="padding: 1rem 3rem;">See More Collection</a>
-            </div>
-            {% endif %}
-        </div>
-    </section>
-
-    <!-- Lend Wardrobe peer promotion section -->
-    <section id="lend-promo" class="how-it-works" style="background: linear-gradient(to top, transparent, rgba(201, 162, 101, 0.02)); border-top: 1px solid var(--card-border); padding: 5rem 5%;">
-        <div class="container fade-in">
-            <h2 class="section-title">Lend Your Wardrobe</h2>
-            <p class="section-subtitle">Turn your unused premium outfits into recurring revenue.</p>
-            
-            <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 24px; padding: 4rem 3rem; display: flex; align-items: center; justify-content: space-between; gap: 3rem; flex-wrap: wrap;">
-                <div style="flex: 1.5; min-width: 300px;">
-                    <h3 style="font-size: 2rem; margin-bottom: 1rem; font-family: var(--font-serif); color: var(--accent-color);">Earn from Your Outfits</h3>
-                    <p style="color: #a0a0a0; margin-bottom: 2rem; font-size: 1.05rem; line-height: 1.8;">
-                        Do you have designer gowns, tailored tuxedos, or premium sherwanis sitting in your closet? List them in our exclusive collection! Set your rental pricing, and let us handle dry cleaning, shipping, and insurance. Track your earnings instantly in your dashboard.
-                    </p>
-                    <a href="{{ url_for('lend_clothes') }}" class="btn btn-primary" style="box-shadow: 0 0 20px rgba(201, 162, 101, 0.3);">List Your Outfit Now</a>
-                </div>
-                <div style="flex: 1; min-width: 250px; display: flex; flex-direction: column; gap: 1.5rem;">
-                    <div style="display: flex; gap: 1rem; align-items: flex-start;">
-                        <span style="background: rgba(201,162,101,0.1); color: var(--accent-color); font-weight: 800; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.95rem;">✓</span>
-                        <div>
-                            <h4 style="color: white; margin-bottom: 0.25rem;">Free Listing & Insurance</h4>
-                            <p style="color: #a0a0a0; font-size: 0.9rem;">We protect your garments and list them for free.</p>
-                        </div>
-                    </div>
-                    <div style="display: flex; gap: 1rem; align-items: flex-start;">
-                        <span style="background: rgba(201,162,101,0.1); color: var(--accent-color); font-weight: 800; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.95rem;">✓</span>
-                        <div>
-                            <h4 style="color: white; margin-bottom: 0.25rem;">Professional Care</h4>
-                            <p style="color: #a0a0a0; font-size: 0.9rem;">Your clothes are dry-cleaned by eco-friendly specialists after each rental.</p>
-                        </div>
-                    </div>
-                    <div style="display: flex; gap: 1rem; align-items: flex-start;">
-                        <span style="background: rgba(201,162,101,0.1); color: var(--accent-color); font-weight: 800; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.95rem;">✓</span>
-                        <div>
-                            <h4 style="color: white; margin-bottom: 0.25rem;">Direct Earnings</h4>
-                            <p style="color: #a0a0a0; font-size: 0.9rem;">Receive secure deposits directly to your account via UPI.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <section id="testimonials" class="testimonials">
         <div class="container fade-in">
@@ -221,5 +121,333 @@
     
     <!-- Custom JS -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    
+    <!-- GLTFLoader for Three.js (r134 matching version) -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/loaders/GLTFLoader.js"></script>
+    
+    <script>
+        (function() {
+            const canvas = document.getElementById('hero-3d-canvas');
+            if (!canvas) return;
+            
+            const container = canvas.parentElement;
+            
+            const scene = new THREE.Scene();
+            
+            const renderer = new THREE.WebGLRenderer({
+                canvas: canvas,
+                antialias: true,
+                alpha: true
+            });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            
+            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(0, 0, 3.2);
+            
+            const dressGroup = new THREE.Group();
+            scene.add(dressGroup);
+            
+            // Soft lighting
+            const ambient = new THREE.AmbientLight(0xffffff, 0.7);
+            scene.add(ambient);
+            
+            const keyLight = new THREE.DirectionalLight(0xfffaee, 1.2);
+            keyLight.position.set(5, 5, 5);
+            keyLight.castShadow = true;
+            scene.add(keyLight);
+            
+            const fillLight = new THREE.DirectionalLight(0xe5f0ff, 0.6);
+            fillLight.position.set(-5, 2, -5);
+            scene.add(fillLight);
+            
+            const pointLight = new THREE.PointLight(0xfff3e0, 1.0, 10);
+            pointLight.position.set(0, 1.5, 2);
+            scene.add(pointLight);
+
+            // Ground shadow
+            const shadowGeo = new THREE.PlaneGeometry(2.5, 2.5);
+            const shadowCanvas = document.createElement('canvas');
+            shadowCanvas.width = 64;
+            shadowCanvas.height = 64;
+            const shadowCtx = shadowCanvas.getContext('2d');
+            const grad = shadowCtx.createRadialGradient(32, 32, 0, 32, 32, 30);
+            grad.addColorStop(0, 'rgba(0, 0, 0, 0.45)');
+            grad.addColorStop(0.5, 'rgba(0, 0, 0, 0.15)');
+            grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            shadowCtx.fillStyle = grad;
+            shadowCtx.fillRect(0, 0, 64, 64);
+            const shadowTexture = new THREE.CanvasTexture(shadowCanvas);
+            const shadowMat = new THREE.MeshBasicMaterial({
+                map: shadowTexture,
+                transparent: true,
+                depthWrite: false
+            });
+            const shadowMesh = new THREE.Mesh(shadowGeo, shadowMat);
+            shadowMesh.rotation.x = -Math.PI / 2;
+            shadowMesh.position.y = -1.15;
+            scene.add(shadowMesh);
+            
+            // Mouse parallax tracker
+            let mouseX = 0, mouseY = 0;
+            let targetX = 0, targetY = 0;
+            window.addEventListener('mousemove', (e) => {
+                targetX = (e.clientX - window.innerWidth / 2) / (window.innerWidth / 2);
+                targetY = (e.clientY - window.innerHeight / 2) / (window.innerHeight / 2);
+            });
+            
+            function hideLoader() {
+                const loader = document.getElementById('hero-loader');
+                if (loader) loader.style.display = 'none';
+            }
+
+            // Real 3D Volumetric Geometric Mesh Gown Construction on Mannequin
+            function buildProcedural() {
+                const model = new THREE.Group();
+
+                // 1. Square Dark Marble Display Pedestal Base
+                const marbleMat = new THREE.MeshPhysicalMaterial({
+                    color: 0x1c2028,
+                    roughness: 0.12,
+                    metalness: 0.3,
+                    clearcoat: 0.9,
+                    clearcoatRoughness: 0.08
+                });
+                const pedestalGeo = new THREE.BoxGeometry(1.3, 0.16, 1.3);
+                const pedestal = new THREE.Mesh(pedestalGeo, marbleMat);
+                pedestal.position.y = -1.1;
+                pedestal.castShadow = true;
+                pedestal.receiveShadow = true;
+                model.add(pedestal);
+
+                // Ornate Royal Gold Accent Rim
+                const brass = new THREE.MeshPhysicalMaterial({ color: 0xd4af37, roughness: 0.12, metalness: 0.95 });
+                const rimGeo = new THREE.BoxGeometry(1.32, 0.02, 1.32);
+                const rim = new THREE.Mesh(rimGeo, brass);
+                rim.position.y = -1.02;
+                model.add(rim);
+
+                // Stand Support Rod
+                const poleGeo = new THREE.CylinderGeometry(0.018, 0.018, 2.2, 16);
+                const pole = new THREE.Mesh(poleGeo, brass);
+                pole.position.y = -0.05;
+                model.add(pole);
+
+                // 2. Mannequin Form Core
+                const bodyMat = new THREE.MeshPhysicalMaterial({ color: 0x14151a, roughness: 0.4, metalness: 0.2 });
+                const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.11, 0.58, 32), bodyMat);
+                torso.position.y = 0.5;
+                model.add(torso);
+                
+                const bust = new THREE.Mesh(new THREE.SphereGeometry(0.17, 32, 32), bodyMat);
+                bust.scale.set(1, 0.8, 1.1);
+                bust.position.set(0, 0.68, 0.02);
+                model.add(bust);
+
+                // 3. Deep Navy Blue Velvet Tuxedo Jacket Bodice
+                const dressMat = new THREE.MeshPhysicalMaterial({
+                    color: 0x060f26, // Deep Rich Navy Blue Velvet
+                    roughness: 0.35,
+                    metalness: 0.1,
+                    clearcoat: 0.4,
+                    clearcoatRoughness: 0.2,
+                    side: THREE.DoubleSide
+                });
+
+                // Tailored Jacket Sleeves
+                const sleeveGeo = new THREE.CylinderGeometry(0.048, 0.038, 0.56, 24);
+                const leftSleeve = new THREE.Mesh(sleeveGeo, dressMat);
+                leftSleeve.position.set(-0.23, 0.45, 0);
+                leftSleeve.rotation.z = 0.22;
+                model.add(leftSleeve);
+
+                const rightSleeve = new THREE.Mesh(sleeveGeo, dressMat);
+                rightSleeve.position.set(0.23, 0.45, 0);
+                rightSleeve.rotation.z = -0.22;
+                model.add(rightSleeve);
+
+                // Ornate Royal Gold Cuffs
+                const cuffGeo = new THREE.CylinderGeometry(0.042, 0.043, 0.1, 24);
+                const leftCuff = new THREE.Mesh(cuffGeo, brass);
+                leftCuff.position.set(-0.28, 0.2, 0);
+                leftCuff.rotation.z = 0.22;
+                model.add(leftCuff);
+
+                const rightCuff = new THREE.Mesh(cuffGeo, brass);
+                rightCuff.position.set(0.28, 0.2, 0);
+                rightCuff.rotation.z = -0.22;
+                model.add(rightCuff);
+
+                // 4. Volumetric Cascading High-Low Skirt with Rear Train
+                const skirtGeom = new THREE.CylinderGeometry(0.12, 0.95, 1.58, 64, 40, true);
+                const pos = skirtGeom.attributes.position;
+                for (let i = 0; i < pos.count; i++) {
+                    const x = pos.getX(i);
+                    const y = pos.getY(i);
+                    const z = pos.getZ(i);
+                    const angle = Math.atan2(z, x);
+                    const r = Math.sqrt(x*x + z*z);
+                    const heightFactor = (0.79 - y) / 1.58;
+                    const wave = Math.sin(angle * 14 + y * 2.5) * 0.11 * heightFactor;
+                    
+                    // Rear train extension pooling backward
+                    const trainFactor = (z < 0) ? Math.abs(z) * 0.48 * heightFactor : 0;
+                    pos.setX(i, Math.cos(angle) * (r + wave));
+                    pos.setZ(i, Math.sin(angle) * (r + wave) - trainFactor);
+                }
+                skirtGeom.computeVertexNormals();
+                const skirtMesh = new THREE.Mesh(skirtGeom, dressMat);
+                skirtMesh.position.y = -0.2;
+                skirtMesh.castShadow = true;
+                skirtMesh.receiveShadow = true;
+                model.add(skirtMesh);
+
+                // 5. Metallic Gold Inner Skirt Lining (High-Low Layer)
+                const innerGoldMat = new THREE.MeshPhysicalMaterial({
+                    color: 0xd4af37,
+                    metalness: 0.95,
+                    roughness: 0.14,
+                    clearcoat: 0.7,
+                    side: THREE.BackSide
+                });
+                const innerGoldSkirt = new THREE.Mesh(skirtGeom, innerGoldMat);
+                innerGoldSkirt.position.y = -0.2;
+                innerGoldSkirt.scale.set(0.98, 0.98, 0.98);
+                model.add(innerGoldSkirt);
+
+                // 6. Jacket Bodice Outer Layer
+                const bodiceGeom = new THREE.CylinderGeometry(0.17, 0.135, 0.46, 32, 10, true);
+                const posB = bodiceGeom.attributes.position;
+                for (let i = 0; i < posB.count; i++) {
+                    const x = posB.getX(i);
+                    const y = posB.getY(i);
+                    const z = posB.getZ(i);
+                    const angle = Math.atan2(z, x);
+                    const r = Math.sqrt(x*x + z*z);
+                    const wave = Math.sin(angle * 16) * 0.007;
+                    posB.setX(i, Math.cos(angle) * (r + wave));
+                    posB.setZ(i, Math.sin(angle) * (r + wave));
+                }
+                bodiceGeom.computeVertexNormals();
+                const bodiceMesh = new THREE.Mesh(bodiceGeom, dressMat);
+                bodiceMesh.position.y = 0.53;
+                bodiceMesh.castShadow = true;
+                model.add(bodiceMesh);
+
+                // 7. Gold Peak Lapels & Filigree Accents
+                const lapelMat = new THREE.MeshPhysicalMaterial({ color: 0xd4af37, metalness: 0.95, roughness: 0.12 });
+                const lapelGeo = new THREE.BoxGeometry(0.045, 0.42, 0.028);
+                const leftLapel = new THREE.Mesh(lapelGeo, lapelMat);
+                leftLapel.position.set(-0.068, 0.59, 0.13);
+                leftLapel.rotation.z = -0.32;
+                model.add(leftLapel);
+
+                const rightLapel = new THREE.Mesh(lapelGeo, lapelMat);
+                rightLapel.position.set(0.068, 0.59, 0.13);
+                rightLapel.rotation.z = 0.32;
+                model.add(rightLapel);
+
+                // 8. Crisp White Shirt Insert & Gold Buttons
+                const shirtMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.3 });
+                const shirtGeo = new THREE.CylinderGeometry(0.115, 0.09, 0.38, 16, 1, false, -Math.PI/4, Math.PI/2);
+                const shirt = new THREE.Mesh(shirtGeo, shirtMat);
+                shirt.position.set(0, 0.59, 0.05);
+                model.add(shirt);
+
+                // Shirt Buttons
+                for (let yPos of [0.66, 0.59, 0.52]) {
+                    const buttonGeo = new THREE.SphereGeometry(0.011, 12, 12);
+                    const button = new THREE.Mesh(buttonGeo, lapelMat);
+                    button.position.set(0, yPos, 0.14);
+                    model.add(button);
+                }
+
+                // 9. Navy Bow Tie
+                const tieMat = new THREE.MeshPhysicalMaterial({ color: 0x040818, roughness: 0.4 });
+                const tieGeo = new THREE.BoxGeometry(0.12, 0.04, 0.035);
+                const bowTie = new THREE.Mesh(tieGeo, tieMat);
+                bowTie.position.set(0, 0.73, 0.16);
+                model.add(bowTie);
+
+                // 10. Royal Gold Embroidered Waist Belt
+                const beltGeom = new THREE.TorusGeometry(0.145, 0.018, 16, 40);
+                const belt = new THREE.Mesh(beltGeom, brass);
+                belt.rotation.x = Math.PI / 2;
+                belt.position.y = 0.35;
+                belt.scale.set(1.0, 1.1, 1.0);
+                model.add(belt);
+
+                dressGroup.add(model);
+                hideLoader();
+            }
+
+            buildProcedural();
+
+            // 4. Manual Drag-to-Rotate Interaction (NO Automatic Rotation/Floating)
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+            let targetRotationY = 0;
+            let targetRotationX = 0;
+
+            const onPointerDown = (e) => {
+                isDragging = true;
+                previousMousePosition = {
+                    x: e.clientX || (e.touches && e.touches[0].clientX) || 0,
+                    y: e.clientY || (e.touches && e.touches[0].clientY) || 0
+                };
+            };
+
+            const onPointerMove = (e) => {
+                if (!isDragging) return;
+                const currentX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+                const currentY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+
+                const deltaX = currentX - previousMousePosition.x;
+                const deltaY = currentY - previousMousePosition.y;
+
+                targetRotationY += deltaX * 0.008;
+                targetRotationX += deltaY * 0.005;
+
+                // Clamp tilt angle
+                targetRotationX = Math.max(-0.4, Math.min(0.4, targetRotationX));
+
+                previousMousePosition = { x: currentX, y: currentY };
+            };
+
+            const onPointerUp = () => {
+                isDragging = false;
+            };
+
+            canvas.style.cursor = 'grab';
+            canvas.addEventListener('mousedown', (e) => { canvas.style.cursor = 'grabbing'; onPointerDown(e); });
+            canvas.addEventListener('touchstart', onPointerDown, { passive: true });
+
+            window.addEventListener('mousemove', onPointerMove);
+            window.addEventListener('touchmove', onPointerMove, { passive: true });
+
+            window.addEventListener('mouseup', () => { canvas.style.cursor = 'grab'; onPointerUp(); });
+            window.addEventListener('touchend', onPointerUp);
+
+            // Render loop with smooth damping towards manual drag targets (Zero auto movement)
+            function animate() {
+                requestAnimationFrame(animate);
+
+                // Smooth damping towards manual drag coordinates
+                dressGroup.rotation.y += (targetRotationY - dressGroup.rotation.y) * 0.1;
+                dressGroup.rotation.x += (targetRotationX - dressGroup.rotation.x) * 0.1;
+
+                renderer.render(scene, camera);
+            }
+            animate();
+            
+            // Resize handler
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+        })();
+    </script>
 </body>
 </html>

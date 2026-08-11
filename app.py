@@ -164,6 +164,115 @@ login_manager.init_app(app)
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+def generate_virtual_3d_image(filename, category):
+    try:
+        from PIL import Image
+        import os
+        import shutil
+        
+        assets_dir = os.path.join('static', 'assets')
+        input_path = os.path.join(assets_dir, filename)
+        if not os.path.exists(input_path):
+            return filename
+            
+        template_path = os.path.join(assets_dir, 'mannequin_torso_template.png')
+        if not os.path.exists(template_path):
+            return filename
+            
+        template = Image.open(template_path).convert("RGBA")
+        dress = Image.open(input_path).convert("RGBA")
+        
+        width, height = dress.size
+        datas = dress.load()
+        
+        # 1. Classification (is_colored vs dark/neutral suit)
+        colored_pixels = 0
+        total_pixels = 0
+        for y in range(0, height, 10):
+            for x in range(0, width, 10):
+                r, g, b, _ = datas[x, y]
+                total_pixels += 1
+                if max(r, g, b) - min(r, g, b) > 25:
+                    colored_pixels += 1
+                    
+        is_colored = (colored_pixels / total_pixels) > 0.04
+        
+        # 2. Process image with hybrid keying
+        output_dress = Image.new("RGBA", (width, height))
+        out_data = output_dress.load()
+        
+        center_x = width // 2
+        
+        for y in range(height):
+            for x in range(width):
+                r, g, b, a = datas[x, y]
+                is_bg = False
+                
+                if is_colored:
+                    is_neutral = abs(r - g) < 22 and abs(g - b) < 22 and abs(b - r) < 22
+                    if is_neutral or (r > 210 and g > 210 and b > 210):
+                        is_bg = True
+                else:
+                    # Solid black background keying for suits (no checkerboard check needed!)
+                    if (r < 25 and g < 25 and b < 25) or (r > 215 and g > 215 and b > 215):
+                        is_bg = True
+                        
+                # Force outer margins to be transparent background
+                if x < 15 or x > width - 15 or y < 15 or y > height - 15:
+                    is_bg = True
+                    
+                if is_bg:
+                    out_data[x, y] = (0, 0, 0, 0)
+                else:
+                    out_data[x, y] = (r, g, b, a)
+                    
+        # Crop to content bounding box
+        bbox = output_dress.getbbox()
+        if bbox:
+            output_dress = output_dress.crop(bbox)
+            
+        # Resize dress to fit mannequin torso (target width ~ 380px)
+        target_width = 380
+        aspect = output_dress.width / output_dress.height
+        target_height = int(target_width / aspect)
+        
+        if target_height > 580:
+            target_height = 580
+            target_width = int(target_height * aspect)
+            
+        dress_resized = output_dress.resize((target_width, target_height), Image.Resampling.LANCZOS)
+        
+        # Create composite canvas
+        composite = Image.new("RGBA", template.size)
+        
+        # Position the dress on the mannequin torso
+        paste_x = (template.width - target_width) // 2
+        paste_y = 295
+        
+        composite.paste(dress_resized, (paste_x, paste_y), dress_resized)
+        
+        # Combine template background and composite garment
+        final_image = Image.alpha_composite(template, composite)
+        
+        # Save output filename
+        virtual_filename = f"virtual_3d_{filename}"
+        output_path = os.path.join(assets_dir, virtual_filename)
+        final_image.convert("RGB").save(output_path, "PNG")
+        
+        # Also copy it to frontend/public if it exists
+        frontend_public = os.path.join('frontend', 'public')
+        if os.path.exists(frontend_public):
+            shutil_path = os.path.join(frontend_public, virtual_filename)
+            shutil_dir = os.path.dirname(shutil_path)
+            if os.path.exists(shutil_dir):
+                final_image.convert("RGB").save(shutil_path, "PNG")
+                
+        return virtual_filename
+        
+    except Exception as e:
+        print(f"AI 3D Image generation failed: {e}")
+        return filename
+
 with app.app_context():
     # Dynamic DB Migration Helper for SQLite
     if db.engine.name == 'sqlite':
@@ -194,19 +303,21 @@ with app.app_context():
     db.create_all()
     # Seed the database with initial dresses if empty
     if not Dress.query.first():
+        v_dress = generate_virtual_3d_image('dress_premium.png', 'dress')
+        v_suit = generate_virtual_3d_image('suit_premium.png', 'suit')
         dresses = [
-            Dress(name='Midnight Gala Gown', description='A stunning elegant evening gown.', price_per_day=4500.0, image_file='dress_premium.png', css_filter=''),
-            Dress(name='Classic Tailored Suit', description='A sharp suit for executive meetings.', price_per_day=3200.0, image_file='suit_premium.png', css_filter=''),
-            Dress(name='Emerald Silk Slip', description='Minimalist luxury for any occasion.', price_per_day=2800.0, image_file='dress_premium.png', css_filter=''),
-            Dress(name='Velvet Tuxedo', description='Stand out with a deep black velvet tux.', price_per_day=5500.0, image_file='suit_premium.png', css_filter=''),
-            Dress(name='Royal Indigo Sherwani', description='Traditional luxury suit crafted from pure silk.', price_per_day=6000.0, image_file='suit_premium.png', css_filter=''),
-            Dress(name='Golden Shimmer Sari', description='A heavily embroidered designer sari with gold accents.', price_per_day=4800.0, image_file='dress_premium.png', css_filter=''),
-            Dress(name='Ruby Crimson Blazer', description='A striking scarlet blazer for formal events.', price_per_day=3500.0, image_file='suit_premium.png', css_filter=''),
-            Dress(name='Sapphire Evening Dress', description='A deep blue gown that catches the light beautifully.', price_per_day=4200.0, image_file='dress_premium.png', css_filter=''),
-            Dress(name='Ivory Wedding Tux', description='Pristine white tuxedo set for wedding celebrations.', price_per_day=5800.0, image_file='suit_premium.png', css_filter=''),
-            Dress(name='Rose Gold Prom Dress', description='Elegant flowing silhouette in soft rose gold colors.', price_per_day=3900.0, image_file='dress_premium.png', css_filter=''),
-            Dress(name='Champagne Silk Gown', description='Liquid gold styling with soft drape detailing.', price_per_day=5000.0, image_file='dress_premium.png', css_filter=''),
-            Dress(name='Charcoal Executive Suit', description='Deep gray tailored wool blend formal wear.', price_per_day=3400.0, image_file='suit_premium.png', css_filter='')
+            Dress(name='Midnight Gala Gown', description='A stunning elegant evening gown.', price_per_day=4500.0, image_file=v_dress, css_filter=''),
+            Dress(name='Classic Tailored Suit', description='A sharp suit for executive meetings.', price_per_day=3200.0, image_file=v_suit, css_filter=''),
+            Dress(name='Emerald Silk Slip', description='Minimalist luxury for any occasion.', price_per_day=2800.0, image_file=v_dress, css_filter=''),
+            Dress(name='Velvet Tuxedo', description='Stand out with a deep black velvet tux.', price_per_day=5500.0, image_file=v_suit, css_filter=''),
+            Dress(name='Royal Indigo Sherwani', description='Traditional luxury suit crafted from pure silk.', price_per_day=6000.0, image_file=v_suit, css_filter=''),
+            Dress(name='Golden Shimmer Sari', description='A heavily embroidered designer sari with gold accents.', price_per_day=4800.0, image_file=v_dress, css_filter=''),
+            Dress(name='Ruby Crimson Blazer', description='A striking scarlet blazer for formal events.', price_per_day=3500.0, image_file=v_suit, css_filter=''),
+            Dress(name='Sapphire Evening Dress', description='A deep blue gown that catches the light beautifully.', price_per_day=4200.0, image_file=v_dress, css_filter=''),
+            Dress(name='Ivory Wedding Tux', description='Pristine white tuxedo set for wedding celebrations.', price_per_day=5800.0, image_file=v_suit, css_filter=''),
+            Dress(name='Rose Gold Prom Dress', description='Elegant flowing silhouette in soft rose gold colors.', price_per_day=3900.0, image_file=v_dress, css_filter=''),
+            Dress(name='Champagne Silk Gown', description='Liquid gold styling with soft drape detailing.', price_per_day=5000.0, image_file=v_dress, css_filter=''),
+            Dress(name='Charcoal Executive Suit', description='Deep gray tailored wool blend formal wear.', price_per_day=3400.0, image_file=v_suit, css_filter='')
         ]
         db.session.bulk_save_objects(dresses)
         
@@ -236,6 +347,17 @@ with app.app_context():
             )
             db.session.add(hybrid_gown)
             db.session.commit()
+
+    # Dynamic startup migration to convert existing garments to 3D virtual mannequin images
+    try:
+        existing_dresses = Dress.query.all()
+        for d in existing_dresses:
+            if d.image_file and not d.image_file.startswith('virtual_3d_') and d.image_file != 'hybrid_couture_gown.png':
+                cat = 'suit' if 'suit' in d.name.lower() or 'tux' in d.name.lower() or 'sherwani' in d.name.lower() or 'blazer' in d.name.lower() else 'dress'
+                d.image_file = generate_virtual_3d_image(d.image_file, cat)
+        db.session.commit()
+    except Exception as d_err:
+        print(f"Startup dynamic dress migration failed: {d_err}")
 
 @app.route('/')
 def index():
@@ -770,7 +892,9 @@ def lend_clothes():
         # Handle file upload via helper function (supports local filesystem fallback or Cloudinary)
         file = request.files.get('image')
         try:
-            image_file = save_uploaded_image(file, category)
+            raw_image = save_uploaded_image(file, category)
+            # Process raw uploaded image through AI virtual 3D mannequin generator
+            image_file = generate_virtual_3d_image(raw_image, category)
         except ValueError as val_err:
             flash(str(val_err))
             return redirect(url_for('lend_clothes'))

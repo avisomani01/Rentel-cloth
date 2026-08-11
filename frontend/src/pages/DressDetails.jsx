@@ -321,34 +321,6 @@ const DressDetails = () => {
               style={getFilterStyle()}
             />
           </div>
-          <Link 
-            to={`/dress/${dress.id}/showcase`}
-            className="btn btn-outline 3d-showcase-btn"
-            style={{
-              width: '100%',
-              maxWidth: '450px',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justify-content: 'center',
-              gap: '0.6rem',
-              borderColor: 'var(--primary)',
-              color: 'var(--primary)',
-              fontWeight: 700,
-              borderRadius: '30px',
-              padding: '0.8rem 2.2rem',
-              textDecoration: 'none',
-              textTransform: 'uppercase',
-              letterSpacing: '1px',
-              fontSize: '0.9rem'
-            }}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ verticalAlign: 'middle' }}>
-              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Virtual 3D Interactive Tour
-          </Link>
         </div>
 
         <div className="detail-info">

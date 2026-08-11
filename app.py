@@ -301,23 +301,39 @@ with app.app_context():
             print(f"Migration warning: {e}")
 
     db.create_all()
+    
+    DEFAULT_FILTERS = {
+        'Midnight Gala Gown': 'filter: hue-rotate(50deg) brightness(0.6);',
+        'Classic Tailored Suit': '',
+        'Emerald Silk Slip': 'filter: hue-rotate(90deg) saturate(1.5) brightness(0.9);',
+        'Velvet Tuxedo': 'filter: hue-rotate(220deg) brightness(0.5);',
+        'Royal Indigo Sherwani': 'filter: hue-rotate(190deg) saturate(1.8) brightness(0.85);',
+        'Golden Shimmer Sari': 'filter: hue-rotate(-20deg) saturate(1.5) brightness(1.2);',
+        'Ruby Crimson Blazer': 'filter: hue-rotate(-120deg) saturate(2.0) brightness(0.9);',
+        'Sapphire Evening Dress': 'filter: hue-rotate(200deg) saturate(1.8) brightness(0.8);',
+        'Ivory Wedding Tux': 'filter: sepia(0.2) brightness(1.5) contrast(1.1);',
+        'Rose Gold Prom Dress': 'filter: hue-rotate(-60deg) saturate(1.2) brightness(1.1);',
+        'Champagne Silk Gown': 'filter: hue-rotate(-30deg) saturate(0.8) brightness(1.25);',
+        'Charcoal Executive Suit': 'filter: grayscale(1.0) brightness(0.75);'
+    }
+
     # Seed the database with initial dresses if empty
     if not Dress.query.first():
         v_dress = generate_virtual_3d_image('dress_premium.png', 'dress')
         v_suit = generate_virtual_3d_image('suit_premium.png', 'suit')
         dresses = [
-            Dress(name='Midnight Gala Gown', description='A stunning elegant evening gown.', price_per_day=4500.0, image_file=v_dress, css_filter=''),
-            Dress(name='Classic Tailored Suit', description='A sharp suit for executive meetings.', price_per_day=3200.0, image_file=v_suit, css_filter=''),
-            Dress(name='Emerald Silk Slip', description='Minimalist luxury for any occasion.', price_per_day=2800.0, image_file=v_dress, css_filter=''),
-            Dress(name='Velvet Tuxedo', description='Stand out with a deep black velvet tux.', price_per_day=5500.0, image_file=v_suit, css_filter=''),
-            Dress(name='Royal Indigo Sherwani', description='Traditional luxury suit crafted from pure silk.', price_per_day=6000.0, image_file=v_suit, css_filter=''),
-            Dress(name='Golden Shimmer Sari', description='A heavily embroidered designer sari with gold accents.', price_per_day=4800.0, image_file=v_dress, css_filter=''),
-            Dress(name='Ruby Crimson Blazer', description='A striking scarlet blazer for formal events.', price_per_day=3500.0, image_file=v_suit, css_filter=''),
-            Dress(name='Sapphire Evening Dress', description='A deep blue gown that catches the light beautifully.', price_per_day=4200.0, image_file=v_dress, css_filter=''),
-            Dress(name='Ivory Wedding Tux', description='Pristine white tuxedo set for wedding celebrations.', price_per_day=5800.0, image_file=v_suit, css_filter=''),
-            Dress(name='Rose Gold Prom Dress', description='Elegant flowing silhouette in soft rose gold colors.', price_per_day=3900.0, image_file=v_dress, css_filter=''),
-            Dress(name='Champagne Silk Gown', description='Liquid gold styling with soft drape detailing.', price_per_day=5000.0, image_file=v_dress, css_filter=''),
-            Dress(name='Charcoal Executive Suit', description='Deep gray tailored wool blend formal wear.', price_per_day=3400.0, image_file=v_suit, css_filter='')
+            Dress(name='Midnight Gala Gown', description='A stunning elegant evening gown.', price_per_day=4500.0, image_file=v_dress, css_filter=DEFAULT_FILTERS['Midnight Gala Gown']),
+            Dress(name='Classic Tailored Suit', description='A sharp suit for executive meetings.', price_per_day=3200.0, image_file=v_suit, css_filter=DEFAULT_FILTERS['Classic Tailored Suit']),
+            Dress(name='Emerald Silk Slip', description='Minimalist luxury for any occasion.', price_per_day=2800.0, image_file=v_dress, css_filter=DEFAULT_FILTERS['Emerald Silk Slip']),
+            Dress(name='Velvet Tuxedo', description='Stand out with a deep black velvet tux.', price_per_day=5500.0, image_file=v_suit, css_filter=DEFAULT_FILTERS['Velvet Tuxedo']),
+            Dress(name='Royal Indigo Sherwani', description='Traditional luxury suit crafted from pure silk.', price_per_day=6000.0, image_file=v_suit, css_filter=DEFAULT_FILTERS['Royal Indigo Sherwani']),
+            Dress(name='Golden Shimmer Sari', description='A heavily embroidered designer sari with gold accents.', price_per_day=4800.0, image_file=v_dress, css_filter=DEFAULT_FILTERS['Golden Shimmer Sari']),
+            Dress(name='Ruby Crimson Blazer', description='A striking scarlet blazer for formal events.', price_per_day=3500.0, image_file=v_suit, css_filter=DEFAULT_FILTERS['Ruby Crimson Blazer']),
+            Dress(name='Sapphire Evening Dress', description='A deep blue gown that catches the light beautifully.', price_per_day=4200.0, image_file=v_dress, css_filter=DEFAULT_FILTERS['Sapphire Evening Dress']),
+            Dress(name='Ivory Wedding Tux', description='Pristine white tuxedo set for wedding celebrations.', price_per_day=5800.0, image_file=v_suit, css_filter=DEFAULT_FILTERS['Ivory Wedding Tux']),
+            Dress(name='Rose Gold Prom Dress', description='Elegant flowing silhouette in soft rose gold colors.', price_per_day=3900.0, image_file=v_dress, css_filter=DEFAULT_FILTERS['Rose Gold Prom Dress']),
+            Dress(name='Champagne Silk Gown', description='Liquid gold styling with soft drape detailing.', price_per_day=5000.0, image_file=v_dress, css_filter=DEFAULT_FILTERS['Champagne Silk Gown']),
+            Dress(name='Charcoal Executive Suit', description='Deep gray tailored wool blend formal wear.', price_per_day=3400.0, image_file=v_suit, css_filter=DEFAULT_FILTERS['Charcoal Executive Suit'])
         ]
         db.session.bulk_save_objects(dresses)
         
@@ -348,13 +364,15 @@ with app.app_context():
             db.session.add(hybrid_gown)
             db.session.commit()
 
-    # Dynamic startup migration to convert existing garments to 3D virtual mannequin images
+    # Dynamic startup migration to convert existing garments to 3D virtual mannequin images and set default css filters
     try:
         existing_dresses = Dress.query.all()
         for d in existing_dresses:
             if d.image_file and not d.image_file.startswith('virtual_3d_') and d.image_file != 'hybrid_couture_gown.png':
                 cat = 'suit' if 'suit' in d.name.lower() or 'tux' in d.name.lower() or 'sherwani' in d.name.lower() or 'blazer' in d.name.lower() else 'dress'
                 d.image_file = generate_virtual_3d_image(d.image_file, cat)
+            if d.name in DEFAULT_FILTERS and (not d.css_filter or d.css_filter == ''):
+                d.css_filter = DEFAULT_FILTERS[d.name]
         db.session.commit()
     except Exception as d_err:
         print(f"Startup dynamic dress migration failed: {d_err}")

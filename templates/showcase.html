@@ -605,89 +605,14 @@
             return color;
         }
 
-        // 7. Load GLB Model or Fallback to Procedural Gown
+        // 7. Render Procedural Custom Silhouettes Instantly
         function loadModel() {
-            const dressName = "{{ dress.name }}".toLowerCase();
-            if (dressName.includes('hybrid') || dressName.includes('tuxedo')) {
-                buildProceduralDress();
-                hideLoader();
-                setupScrollTrigger();
-                return;
-            }
-
-            const loader = new THREE.GLTFLoader();
-            const modelUrl = "{{ url_for('static', filename='assets/Corset.glb') }}";
-            
-            loader.load(
-                modelUrl,
-                (gltf) => {
-                    model = gltf.scene;
-                    
-                    // Center and scale model using Bounding Box
-                    const box = new THREE.Box3().setFromObject(model);
-                    const center = box.getCenter(new THREE.Vector3());
-                    const size = box.getSize(new THREE.Vector3());
-                    
-                    // Shift model to center
-                    model.position.x += (model.position.x - center.x);
-                    model.position.y += (model.position.y - center.y);
-                    model.position.z += (model.position.z - center.z);
-                    
-                    // Scale model appropriately to fit viewport
-                    const maxDim = Math.max(size.x, size.y, size.z);
-                    const targetHeight = 1.8; // Target height in scene
-                    const scaleFactor = targetHeight / maxDim;
-                    model.scale.setScalar(scaleFactor);
-                    
-                    // Shift entire model up a bit so base sits near ground
-                    const scaledBox = new THREE.Box3().setFromObject(model);
-                    const bottomY = scaledBox.min.y;
-                    model.position.y -= (bottomY + 1.0); // Align bottom close to -1.0 Y
-                    
-                    // Enhance Materials for Fashion Studio look
-                    const hueShift = parseCssFilterForColor();
-                    
-                    model.traverse((child) => {
-                        if (child.isMesh) {
-                            child.castShadow = true;
-                            child.receiveShadow = true;
-                            
-                            // Make fabric materials look high-end
-                            if (child.material) {
-                                // If hue shift is present, shift base color
-                                if (hueShift !== 0 && child.material.color) {
-                                    child.material.color = applyHueShiftToColor(child.material.color.getHex(), hueShift);
-                                }
-                                
-                                // Material customization for high shine/satin reflection
-                                child.material.roughness = 0.35;
-                                child.material.metalness = 0.15;
-                                if (child.material.isMeshStandardMaterial) {
-                                    child.material.sheen = 1.0;
-                                    child.material.sheenRoughness = 0.4;
-                                    child.material.sheenColor = new THREE.Color(0xd4af37); // Gold sheen highlight
-                                }
-                            }
-                        }
-                    });
-                    
-                    dressGroup.add(model);
-                    hideLoader();
-                    setupScrollTrigger();
-                },
-                (xhr) => {
-                    // Loading progress
-                },
-                (error) => {
-                    console.warn("GLTF Load failed, building premium procedural dress fallback: ", error);
-                    buildProceduralDress();
-                    hideLoader();
-                    setupScrollTrigger();
-                }
-            );
+            buildProceduralDress();
+            hideLoader();
+            setupScrollTrigger();
         }
 
-        // 8. Procedural Gown Construction (fallback)
+        // 8. Procedural Garment Construction (instantly loading & highly customized)
         function buildProceduralDress() {
             model = new THREE.Group();
             
@@ -743,22 +668,47 @@
             bust.castShadow = true;
             model.add(bust);
 
+            // Detect silhouette types
+            const dressNameLower = "{{ dress.name }}".toLowerCase();
+            const isHybrid = dressNameLower.includes('hybrid');
+            const isSuit = dressNameLower.includes('suit') || dressNameLower.includes('tux') || dressNameLower.includes('sherwani') || dressNameLower.includes('blazer');
+            const isSari = dressNameLower.includes('sari');
+            const isSlip = dressNameLower.includes('slip') || dressNameLower.includes('prom') || dressNameLower.includes('gown');
+
             // 8c. Floating Flowing Gown/Fabric (Cylinder deform math)
-            // Color customizer based on database
-            let baseHexColor = 0xd4af37; // Default gold
-            const hueShift = parseCssFilterForColor();
-            if (hueShift !== 0) {
-                const shiftedColor = applyHueShiftToColor(baseHexColor, hueShift);
-                baseHexColor = shiftedColor.getHex();
+            // Color customizer mapping directly to design colors
+            const designerColors = {
+                'Midnight Gala Gown': 0x0f172a,      // Deep Midnight Navy
+                'Classic Tailored Suit': 0x111116,    // Charcoal Black
+                'Emerald Silk Slip': 0x0f766e,        // Emerald Teal/Green
+                'Velvet Tuxedo': 0x1e1b4b,            // Velvet Indigo/Navy
+                'Royal Indigo Sherwani': 0x311042,    // Indigo Purple
+                'Golden Shimmer Sari': 0xd4af37,      // Shimmering Gold
+                'Ruby Crimson Blazer': 0x9b111e,      // Ruby Red
+                'Sapphire Evening Dress': 0x1d4ed8,   // Sapphire Blue
+                'Ivory Wedding Tux': 0xf8fafc,        // Ivory White
+                'Rose Gold Prom Dress': 0xe11d48,      // Rose Gold / Pink Gown
+                'Champagne Silk Gown': 0xca8a04,      // Champagne Gold
+                'Charcoal Executive Suit': 0x374151,  // Charcoal Gray
+                'Royal Hybrid Tuxedo Gown': 0x0f1c3f  // Navy Gown
+            };
+
+            let baseHexColor = 0xb71c1c; // Default red
+            const dressName = "{{ dress.name }}";
+            if (designerColors[dressName] !== undefined) {
+                baseHexColor = designerColors[dressName];
             } else {
-                // Assign color by dress name
-                const name = "{{ dress.name }}".toLowerCase();
-                if (name.includes('hybrid')) baseHexColor = 0x0f1c3f;
-                else if (name.includes('emerald')) baseHexColor = 0x097969;
-                else if (name.includes('midnight') || name.includes('indigo') || name.includes('sapphire')) baseHexColor = 0x1d2951;
-                else if (name.includes('crimson') || name.includes('ruby')) baseHexColor = 0x9b111e;
-                else if (name.includes('rose')) baseHexColor = 0xb76e79;
-                else if (name.includes('charcoal')) baseHexColor = 0x36454f;
+                if (isSuit) {
+                    baseHexColor = 0x1a1a24;
+                } else if (isHybrid) {
+                    baseHexColor = 0x0f1c3f;
+                } else {
+                    const hueShift = parseCssFilterForColor();
+                    if (hueShift !== 0) {
+                        const shiftedColor = applyHueShiftToColor(baseHexColor, hueShift);
+                        baseHexColor = shiftedColor.getHex();
+                    }
+                }
             }
 
             const dressMat = new THREE.MeshPhysicalMaterial({
@@ -772,62 +722,94 @@
                 side: THREE.DoubleSide
             });
 
-            // Create flared skirt geometry
-            const skirtGeom = new THREE.CylinderGeometry(0.13, 0.95, 1.6, 64, 40, true);
-            const pos = skirtGeom.attributes.position;
-            
-            // Deform vertices to simulate silk drapery waves
-            for (let i = 0; i < pos.count; i++) {
-                const x = pos.getX(i);
-                const y = pos.getY(i);
-                const z = pos.getZ(i);
+            if (isSuit) {
+                // 1. Classic Suit/Trouser Silhouette
+                const legMat = new THREE.MeshPhysicalMaterial({
+                    color: baseHexColor,
+                    roughness: 0.35,
+                    metalness: 0.1
+                });
                 
-                const angle = Math.atan2(z, x);
-                const currentRadius = Math.sqrt(x*x + z*z);
-                
-                // Flare calculation (expands wider at base)
-                const heightFactor = (0.8 - y) / 1.6; // 0 at top, 1 at bottom
-                const wave = Math.sin(angle * 12 + y * 2) * 0.09 * heightFactor;
-                
-                const newRadius = currentRadius + wave;
-                pos.setX(i, Math.cos(angle) * newRadius);
-                pos.setZ(i, Math.sin(angle) * newRadius);
-            }
-            skirtGeom.computeVertexNormals();
+                // Left leg
+                const leftLegGeo = new THREE.CylinderGeometry(0.065, 0.05, 1.1, 16);
+                const leftLeg = new THREE.Mesh(leftLegGeo, legMat);
+                leftLeg.position.set(-0.07, -0.3, 0);
+                leftLeg.castShadow = true;
+                model.add(leftLeg);
 
-            const skirtMesh = new THREE.Mesh(skirtGeom, dressMat);
-            skirtMesh.position.y = -0.15;
-            skirtMesh.castShadow = true;
-            skirtMesh.receiveShadow = true;
-            model.add(skirtMesh);
-            
-            // Corset bodice top overlay
-            const bodiceGeom = new THREE.CylinderGeometry(0.18, 0.14, 0.45, 32, 10, true);
-            const posBodice = bodiceGeom.attributes.position;
-            for (let i = 0; i < posBodice.count; i++) {
-                const x = posBodice.getX(i);
-                const y = posBodice.getY(i);
-                const z = posBodice.getZ(i);
-                
-                const angle = Math.atan2(z, x);
-                const currentRadius = Math.sqrt(x*x + z*z);
-                const corsetDetail = Math.sin(angle * 16) * 0.008;
-                
-                const newRadius = currentRadius + corsetDetail;
-                posBodice.setX(i, Math.cos(angle) * newRadius);
-                posBodice.setZ(i, Math.sin(angle) * newRadius);
-            }
-            bodiceGeom.computeVertexNormals();
-            
-            const bodiceMesh = new THREE.Mesh(bodiceGeom, dressMat);
-            bodiceMesh.position.y = 0.58;
-            bodiceMesh.castShadow = true;
-            model.add(bodiceMesh);
+                // Right leg
+                const rightLegGeo = new THREE.CylinderGeometry(0.065, 0.05, 1.1, 16);
+                const rightLeg = new THREE.Mesh(rightLegGeo, legMat);
+                rightLeg.position.set(0.07, -0.3, 0);
+                rightLeg.castShadow = true;
+                model.add(rightLeg);
 
-            // Check for hybrid tuxedo gown details
-            const nameLower = "{{ dress.name }}".toLowerCase();
-            if (nameLower.includes('hybrid') || nameLower.includes('tuxedo')) {
-                // Tuxedo White Shirt Collar Insert
+                // Blazer Jacket Bodice
+                const jacketGeo = new THREE.CylinderGeometry(0.185, 0.16, 0.65, 32, 10, true);
+                const jacketMesh = new THREE.Mesh(jacketGeo, dressMat);
+                jacketMesh.position.y = 0.5;
+                jacketMesh.castShadow = true;
+                model.add(jacketMesh);
+
+                // White Shirt Insert
+                const shirtMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.3 });
+                const shirtGeo = new THREE.CylinderGeometry(0.12, 0.1, 0.35, 16, 1, false, -Math.PI/4, Math.PI/2);
+                const shirt = new THREE.Mesh(shirtGeo, shirtMat);
+                shirt.position.set(0, 0.62, 0.05);
+                model.add(shirt);
+                
+                // Bowtie
+                const tieMat = new THREE.MeshPhysicalMaterial({ color: 0x080f25, roughness: 0.4 });
+                const tieGeo = new THREE.BoxGeometry(0.12, 0.04, 0.03);
+                const bowTie = new THREE.Mesh(tieGeo, tieMat);
+                bowTie.position.set(0, 0.76, 0.16);
+                model.add(bowTie);
+
+                // Left Lapel
+                const lapelGeo = new THREE.BoxGeometry(0.04, 0.3, 0.02);
+                const leftLapel = new THREE.Mesh(lapelGeo, tieMat);
+                leftLapel.position.set(-0.07, 0.58, 0.11);
+                leftLapel.rotation.set(0.1, 0.2, 0.15);
+                model.add(leftLapel);
+
+                // Right Lapel
+                const rightLapel = new THREE.Mesh(lapelGeo, tieMat);
+                rightLapel.position.set(0.07, 0.58, 0.11);
+                rightLapel.rotation.set(0.1, -0.2, -0.15);
+                model.add(rightLapel);
+
+            } else if (isHybrid) {
+                // 2. Hybrid Tuxedo Ballgown
+                const skirtGeom = new THREE.CylinderGeometry(0.13, 0.95, 1.6, 64, 40, true);
+                const pos = skirtGeom.attributes.position;
+                for (let i = 0; i < pos.count; i++) {
+                    const x = pos.getX(i);
+                    const y = pos.getY(i);
+                    const z = pos.getZ(i);
+                    const angle = Math.atan2(z, x);
+                    const currentRadius = Math.sqrt(x*x + z*z);
+                    const heightFactor = (0.8 - y) / 1.6;
+                    const wave = Math.sin(angle * 12 + y * 2) * 0.09 * heightFactor;
+                    const newRadius = currentRadius + wave;
+                    pos.setX(i, Math.cos(angle) * newRadius);
+                    pos.setZ(i, Math.sin(angle) * newRadius);
+                }
+                skirtGeom.computeVertexNormals();
+
+                const skirtMesh = new THREE.Mesh(skirtGeom, dressMat);
+                skirtMesh.position.y = -0.15;
+                skirtMesh.castShadow = true;
+                skirtMesh.receiveShadow = true;
+                model.add(skirtMesh);
+
+                // Bodice
+                const bodiceGeom = new THREE.CylinderGeometry(0.18, 0.14, 0.45, 32, 10, true);
+                const bodiceMesh = new THREE.Mesh(bodiceGeom, dressMat);
+                bodiceMesh.position.y = 0.58;
+                bodiceMesh.castShadow = true;
+                model.add(bodiceMesh);
+
+                // White Shirt Insert
                 const shirtMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.3 });
                 const shirtGeo = new THREE.CylinderGeometry(0.12, 0.1, 0.35, 16, 1, false, -Math.PI/4, Math.PI/2);
                 const shirt = new THREE.Mesh(shirtGeo, shirtMat);
@@ -852,6 +834,101 @@
                 innerGoldSkirt.position.y = -0.15;
                 innerGoldSkirt.scale.set(0.98, 0.98, 0.98);
                 model.add(innerGoldSkirt);
+
+            } else if (isSari) {
+                // 3. Indian Sari draped look
+                const skirtGeom = new THREE.CylinderGeometry(0.13, 0.8, 1.6, 64, 40, true);
+                const pos = skirtGeom.attributes.position;
+                for (let i = 0; i < pos.count; i++) {
+                    const x = pos.getX(i);
+                    const y = pos.getY(i);
+                    const z = pos.getZ(i);
+                    const angle = Math.atan2(z, x);
+                    const currentRadius = Math.sqrt(x*x + z*z);
+                    const heightFactor = (0.8 - y) / 1.6;
+                    const wave = Math.sin(angle * 24 + y * 4) * 0.04 * heightFactor;
+                    const newRadius = currentRadius + wave;
+                    pos.setX(i, Math.cos(angle) * newRadius);
+                    pos.setZ(i, Math.sin(angle) * newRadius);
+                }
+                skirtGeom.computeVertexNormals();
+
+                const skirtMesh = new THREE.Mesh(skirtGeom, dressMat);
+                skirtMesh.position.y = -0.15;
+                skirtMesh.castShadow = true;
+                model.add(skirtMesh);
+
+                // Bodice
+                const bodiceGeom = new THREE.CylinderGeometry(0.18, 0.14, 0.45, 32, 10, true);
+                const bodiceMesh = new THREE.Mesh(bodiceGeom, dressMat);
+                bodiceMesh.position.y = 0.58;
+                bodiceMesh.castShadow = true;
+                model.add(bodiceMesh);
+
+                // Diagonal Sari Pallu/Sash draped over right shoulder to left waist
+                const sashGeom = new THREE.CylinderGeometry(0.19, 0.17, 0.55, 32, 10, true);
+                const sashMesh = new THREE.Mesh(sashGeom, dressMat);
+                sashMesh.position.set(0.01, 0.56, 0.03);
+                sashMesh.rotation.z = -0.4;
+                sashMesh.scale.set(1.08, 1.0, 1.15);
+                sashMesh.castShadow = true;
+                model.add(sashMesh);
+
+                // Decorative gold border on pallu
+                const borderMat = new THREE.MeshPhysicalMaterial({ color: 0xd4af37, metalness: 0.8, roughness: 0.2 });
+                const borderGeom = new THREE.TorusGeometry(0.18, 0.012, 8, 32);
+                const border = new THREE.Mesh(borderGeom, borderMat);
+                border.position.set(0.01, 0.65, 0.04);
+                border.rotation.x = Math.PI / 2;
+                border.rotation.y = 0.4;
+                model.add(border);
+
+            } else {
+                // 4. Sleek Slip Dress / Standard Prom Gown
+                const isSleek = dressNameLower.includes('slip');
+                const bottomRadius = isSleek ? 0.45 : 0.85;
+                
+                const skirtGeom = new THREE.CylinderGeometry(0.13, bottomRadius, 1.6, 64, 40, true);
+                const pos = skirtGeom.attributes.position;
+                for (let i = 0; i < pos.count; i++) {
+                    const x = pos.getX(i);
+                    const y = pos.getY(i);
+                    const z = pos.getZ(i);
+                    const angle = Math.atan2(z, x);
+                    const currentRadius = Math.sqrt(x*x + z*z);
+                    const heightFactor = (0.8 - y) / 1.6;
+                    const wave = Math.sin(angle * 8 + y) * 0.05 * heightFactor;
+                    const newRadius = currentRadius + wave;
+                    pos.setX(i, Math.cos(angle) * newRadius);
+                    pos.setZ(i, Math.sin(angle) * newRadius);
+                }
+                skirtGeom.computeVertexNormals();
+
+                const skirtMesh = new THREE.Mesh(skirtGeom, dressMat);
+                skirtMesh.position.y = -0.15;
+                skirtMesh.castShadow = true;
+                model.add(skirtMesh);
+
+                // Bodice top
+                const bodiceGeom = new THREE.CylinderGeometry(0.18, 0.14, 0.45, 32, 10, true);
+                const bodiceMesh = new THREE.Mesh(bodiceGeom, dressMat);
+                bodiceMesh.position.y = 0.58;
+                bodiceMesh.castShadow = true;
+                model.add(bodiceMesh);
+
+                // Thin spaghetti shoulder straps
+                const strapMat = new THREE.MeshPhysicalMaterial({ color: baseHexColor, roughness: 0.3 });
+                const strapGeo = new THREE.CylinderGeometry(0.005, 0.005, 0.25, 8);
+                
+                const leftStrap = new THREE.Mesh(strapGeo, strapMat);
+                leftStrap.position.set(-0.11, 0.78, 0.08);
+                leftStrap.rotation.z = -0.15;
+                model.add(leftStrap);
+
+                const rightStrap = new THREE.Mesh(strapGeo, strapMat);
+                rightStrap.position.set(0.11, 0.78, 0.08);
+                rightStrap.rotation.z = 0.15;
+                model.add(rightStrap);
             }
 
             // Add gold belt detail

@@ -128,7 +128,7 @@ const ThreeBackground = () => {
       const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
       
       // Clear canvas with a solid background matching active theme
-      ctx.fillStyle = isDark ? '#080A12' : '#F7F3EE';
+      ctx.fillStyle = isDark ? '#090A10' : '#F8F5F0';
       ctx.shadowBlur = 0;
       ctx.fillRect(0, 0, width, height);
  
@@ -145,19 +145,19 @@ const ThreeBackground = () => {
         // Dynamic blob colors based on theme
         let blobColor;
         if (isDark) {
-          if (idx === 0) blobColor = 'rgba(124, 111, 232, 0.08)';    // 3D accent #7C6FE8
-          else if (idx === 1) blobColor = 'rgba(139, 30, 63, 0.07)';   // Primary accent #8B1E3F
-          else blobColor = 'rgba(217, 107, 138, 0.05)';                  // Accent highlight #D96B8A
+          if (idx === 0) blobColor = 'rgba(116, 103, 200, 0.07)';    // Subtle Violet #7467C8
+          else if (idx === 1) blobColor = 'rgba(139, 30, 63, 0.08)';   // Brand Burgundy #8B1E3F
+          else blobColor = 'rgba(229, 183, 195, 0.05)';                  // Heading accent #E5B7C3
         } else {
-          if (idx === 0) blobColor = 'rgba(117, 104, 201, 0.06)';      // 3D accent #7568C9
-          else if (idx === 1) blobColor = 'rgba(139, 30, 63, 0.05)';   // Primary accent #8B1E3F
-          else blobColor = 'rgba(201, 92, 120, 0.04)';                  // Accent highlight #C95C78
+          if (idx === 0) blobColor = 'rgba(118, 105, 184, 0.06)';      // Subtle Violet #7669B8
+          else if (idx === 1) blobColor = 'rgba(139, 30, 63, 0.06)';   // Brand Burgundy #8B1E3F
+          else blobColor = 'rgba(181, 138, 88, 0.04)';                  // Champagne #B58A58
         }
  
         // Create gradient
         const gradient = ctx.createRadialGradient(blob.x, blob.y, 0, blob.x, blob.y, blob.radius);
         gradient.addColorStop(0, blobColor);
-        gradient.addColorStop(1, isDark ? 'rgba(8, 10, 18, 0)' : 'rgba(247, 243, 238, 0)');
+        gradient.addColorStop(1, isDark ? 'rgba(9, 10, 16, 0)' : 'rgba(248, 245, 240, 0)');
  
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, width, height);

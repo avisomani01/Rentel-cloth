@@ -1,5 +1,5 @@
 :root, [data-theme="dark"] {
-    --bg-color: #060609;     /* Deep luxury black */
+    --bg-color: #0b0b14;     /* Deep luxury black */
     --text-color: #f3f3f5;   /* Refined soft white */
     --accent-color: #d4af37; /* Champagne Gold */
     --accent-glow: rgba(212, 175, 55, 0.25);
@@ -22,20 +22,20 @@
 
 [data-theme="light"] {
     --bg-color: #f8f7ff;
-    --text-color: #20202a;
-    --accent-color: #6c63ff; /* Indigo */
-    --accent-glow: rgba(108, 99, 255, 0.4);
-    --primary-color: #6c63ff;
+    --text-color: #1a1a24;     /* Dark slate */
+    --accent-color: #4338ca;   /* Royal Indigo */
+    --accent-glow: rgba(67, 56, 202, 0.35);
+    --primary-color: #4338ca;  /* Royal Indigo */
     --secondary-color: #ff6b9d; /* Pink */
-    --cyan-color: #00c2a8; /* Mint/Teal */
+    --cyan-color: #0f766e;     /* Deep Teal */
     --card-bg: rgba(255, 255, 255, 0.85);
-    --card-border: rgba(108, 99, 255, 0.08);
+    --card-border: rgba(67, 56, 202, 0.15);
     
     --nav-bg: rgba(248, 247, 255, 0.8);
     --footer-bg: #ffffff;
     --card-content-bg: rgba(255, 255, 255, 0.9);
-    --card-content-border: rgba(0, 0, 0, 0.05);
-    --text-muted: #606070;
+    --card-content-border: rgba(0, 0, 0, 0.08);
+    --text-muted: #4a4a5a;     /* Darker muted text */
     --btn-primary-text: #ffffff;
 }
 
@@ -580,3 +580,45 @@ footer {
         flex-direction: column;
     }
 }
+
+/* ==========================================
+   Global Theme Overrides for Light Mode
+   ========================================== */
+[data-theme="light"] input,
+[data-theme="light"] select,
+[data-theme="light"] textarea {
+    background: rgba(0, 0, 0, 0.03) !important;
+    color: #1a1a24 !important;
+    border: 1px solid rgba(0, 0, 0, 0.15) !important;
+}
+
+[data-theme="light"] input::placeholder {
+    color: #777788 !important;
+}
+
+[data-theme="light"] label,
+[data-theme="light"] .date-input label,
+[data-theme="light"] .back-link,
+[data-theme="light"] .size-guide-trigger {
+    color: #4a4a5a !important;
+}
+
+[data-theme="light"] .back-link:hover,
+[data-theme="light"] .size-guide-trigger:hover {
+    color: var(--accent-color) !important;
+}
+
+[data-theme="light"] .hero-subtitle {
+    color: #1a1a24 !important; /* Make subtitle crisp black in light mode */
+    text-shadow: 0 1px 4px rgba(255, 255, 255, 0.6);
+}
+
+[data-theme="light"] .hero-title span {
+    color: #312e81 !important; /* High contrast Royal Indigo text */
+    text-shadow: 0 2px 10px rgba(67, 56, 202, 0.15);
+}
+
+[data-theme="light"] .navbar .logo img {
+    filter: invert(1) drop-shadow(0 2px 10px rgba(0,0,0,0.1)) !important;
+}
+

@@ -14,12 +14,12 @@ document.addEventListener('DOMContentLoaded', () => {
             gyroControls: false,
             minHeight: 200.00,
             minWidth: 200.00,
-            highlightColor: isDark ? 0x1e1938 : 0x6c63ff, // Muted indigo vs Indigo
-            midtoneColor: isDark ? 0x0c0b12 : 0xff6b9d,   // Dark charcoal vs Pink
-            lowlightColor: isDark ? 0x060609 : 0xe2e0ff,   // Space black vs Soft lavender
-            baseColor: isDark ? 0x060609 : 0xf8f7ff,       // Match background
-            blurFactor: 0.70,
-            speed: isDark ? 0.80 : 1.20,
+            highlightColor: isDark ? 0x8b7cff : 0x4338ca, // Purple vs Royal Indigo
+            midtoneColor: isDark ? 0xff6b9d : 0xff6b9d,   // Pink vs Pink
+            lowlightColor: isDark ? 0x20d9c3 : 0xe2e0ff,   // Teal vs Lavender
+            baseColor: isDark ? 0x0b0b14 : 0xf8f7ff,       // Studio Black vs Light Off-white
+            blurFactor: 0.85,
+            speed: isDark ? 0.60 : 1.20,
             zoom: 1.10
         };
 

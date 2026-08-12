@@ -3,7 +3,7 @@
     --secondary: #1a1a24;    /* Premium Slate */
     --accent: #c5a880;       /* Muted Warm Gold */
     --yellow: #ffd166;       /* Pastel yellow */
-    --background: #060609;   /* Deep space-black background */
+    --background: #0b0b14;   /* Deep space-black background */
     --text: #f3f3f5;         /* Refined soft white text */
     --text-muted: #a9a6b9;   /* Muted grey/violet text */
     --white: #101016;        /* Dark slate card solid background */
@@ -23,7 +23,7 @@
 [data-theme="light"] {
     --background: #fbfbfa;   /* Warm off-white background */
     --text: #1a1a24;         /* Premium dark slate text */
-    --text-muted: #606070;   /* Readable muted text for light theme */
+    --text-muted: #4a4a5a;   /* Readable muted text for light theme */
     --white: #ffffff;        /* Clean pure white card solid background */
     --nav-bg: rgba(251, 251, 250, 0.8);
     --footer-bg: rgba(244, 243, 239, 0.95);

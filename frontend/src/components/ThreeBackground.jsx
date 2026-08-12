@@ -128,37 +128,37 @@ const ThreeBackground = () => {
       const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
       
       // Clear canvas with a solid background matching active theme
-      ctx.fillStyle = isDark ? '#060609' : '#f8f7ff';
+      ctx.fillStyle = isDark ? '#0b0b14' : '#f8f7ff';
       ctx.shadowBlur = 0;
       ctx.fillRect(0, 0, width, height);
-
+ 
       // 1. Draw and move Nebula gradients
       blobs.forEach((blob, idx) => {
         // Move blobs slowly
         blob.x += blob.vx;
         blob.y += blob.vy;
-
+ 
         // Bounce blobs off walls
         if (blob.x - blob.radius < 0 || blob.x + blob.radius > width) blob.vx *= -1;
         if (blob.y - blob.radius < 0 || blob.y + blob.radius > height) blob.vy *= -1;
-
+ 
         // Dynamic blob colors based on theme
         let blobColor;
         if (isDark) {
-          if (idx === 0) blobColor = 'rgba(212, 175, 55, 0.04)';    // Gold ambient
-          else if (idx === 1) blobColor = 'rgba(35, 30, 61, 0.06)';   // Indigo ambient
-          else blobColor = 'rgba(197, 168, 128, 0.03)';
+          if (idx === 0) blobColor = 'rgba(139, 124, 255, 0.08)';    // Purple ambient
+          else if (idx === 1) blobColor = 'rgba(255, 107, 157, 0.07)';   // Pink ambient
+          else blobColor = 'rgba(32, 217, 195, 0.05)';                  // Teal ambient
         } else {
           if (idx === 0) blobColor = 'rgba(108, 99, 255, 0.06)';
           else if (idx === 1) blobColor = 'rgba(255, 107, 157, 0.05)';
           else blobColor = 'rgba(0, 194, 168, 0.04)';
         }
-
+ 
         // Create gradient
         const gradient = ctx.createRadialGradient(blob.x, blob.y, 0, blob.x, blob.y, blob.radius);
         gradient.addColorStop(0, blobColor);
-        gradient.addColorStop(1, isDark ? 'rgba(6, 6, 9, 0)' : 'rgba(248, 247, 255, 0)');
-
+        gradient.addColorStop(1, isDark ? 'rgba(11, 11, 20, 0)' : 'rgba(248, 247, 255, 0)');
+ 
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, width, height);
       });

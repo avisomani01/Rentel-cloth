@@ -127,9 +127,9 @@ const HeroThreeDViewer = () => {
       bust.position.set(0, 0.68, 0.02);
       model.add(bust);
 
-      // 3. Deep Navy Blue Velvet Tuxedo Jacket Bodice
+      // 3. Royal Crimson Velvet Tuxedo Jacket Bodice
       const dressMat = new THREE.MeshPhysicalMaterial({
-        color: 0x060f26,
+        color: 0x8b1227,
         roughness: 0.35,
         metalness: 0.1,
         clearcoat: 0.4,

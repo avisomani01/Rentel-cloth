@@ -503,3 +503,8 @@ footer {
         height: 400px;
     }
 }
+
+[data-theme="light"] .footer-bottom {
+    color: #4a4a5a !important;
+    border-top-color: rgba(0, 0, 0, 0.08) !important;
+}

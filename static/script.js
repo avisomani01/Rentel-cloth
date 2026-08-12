@@ -14,10 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
             gyroControls: false,
             minHeight: 200.00,
             minWidth: 200.00,
-            highlightColor: isDark ? 0x8b7cff : 0x4338ca, // Purple vs Royal Indigo
-            midtoneColor: isDark ? 0xff6b9d : 0xff6b9d,   // Pink vs Pink
-            lowlightColor: isDark ? 0x20d9c3 : 0xe2e0ff,   // Teal vs Lavender
-            baseColor: isDark ? 0x0b0b14 : 0xf8f7ff,       // Studio Black vs Light Off-white
+            highlightColor: isDark ? 0x7c6fe8 : 0x7568c9, // 3D accent: #7C6FE8 vs #7568C9
+            midtoneColor: isDark ? 0x8b1e3f : 0x8b1e3f,   // Primary accent: #8B1E3F
+            lowlightColor: isDark ? 0x101525 : 0xefe8e1,   // Secondary bg: #101525 vs #EFE8E1
+            baseColor: isDark ? 0x080a12 : 0xf7f3ee,       // Background base: #080A12 vs #F7F3EE
             blurFactor: 0.85,
             speed: isDark ? 0.60 : 1.20,
             zoom: 1.10

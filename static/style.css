@@ -1,42 +1,48 @@
 :root, [data-theme="dark"] {
-    --bg-color: #0b0b14;     /* Deep luxury black */
-    --text-color: #f3f3f5;   /* Refined soft white */
-    --accent-color: #d4af37; /* Champagne Gold */
-    --accent-glow: rgba(212, 175, 55, 0.25);
-    --primary-color: #231e3d; /* Space indigo */
-    --secondary-color: #1a1a24; /* Slate card background */
-    --cyan-color: #c5a880;   /* Muted warm gold */
-    --card-bg: rgba(26, 26, 36, 0.45);
-    --card-border: rgba(212, 175, 55, 0.12);
+    --bg-color: #080A12;
+    --text-color: #F5F1EA;
+    --text-muted: #AEB6C8;
+    --headings-color: #E8CFA8;
+    --accent-color: #8B1E3F;
+    --accent-highlight: #D96B8A;
+    --accent-3d: #7C6FE8;
+    --card-bg: #151B2E;
+    --card-border: #2A3148;
+    --primary-color: #101525;
+    --secondary-color: #151B2E;
+    --accent-glow: rgba(139, 30, 63, 0.25);
+    --cyan-color: #D96B8A;
     
-    --nav-bg: rgba(6, 6, 9, 0.75);
-    --footer-bg: #030305;
-    --card-content-bg: rgba(6, 6, 9, 0.65);
-    --card-content-border: rgba(212, 175, 55, 0.08);
-    --text-muted: #9fa0a6;   /* Clean light gray */
-    --btn-primary-text: #060609;
+    --nav-bg: rgba(8, 10, 18, 0.85);
+    --footer-bg: #080A12;
+    --card-content-bg: #101525;
+    --card-content-border: #2A3148;
+    --btn-primary-text: #F5F1EA;
     
     --font-sans: 'Outfit', sans-serif;
     --font-serif: 'Playfair Display', serif;
 }
 
 [data-theme="light"] {
-    --bg-color: #f8f7ff;
-    --text-color: #1a1a24;     /* Dark slate */
-    --accent-color: #4338ca;   /* Royal Indigo */
-    --accent-glow: rgba(67, 56, 202, 0.35);
-    --primary-color: #4338ca;  /* Royal Indigo */
-    --secondary-color: #ff6b9d; /* Pink */
-    --cyan-color: #0f766e;     /* Deep Teal */
-    --card-bg: rgba(255, 255, 255, 0.85);
-    --card-border: rgba(67, 56, 202, 0.15);
+    --bg-color: #F7F3EE;
+    --text-color: #171A2B;
+    --text-muted: #62697A;
+    --headings-color: #651B34;
+    --accent-color: #8B1E3F;
+    --accent-highlight: #C95C78;
+    --accent-3d: #7568C9;
+    --card-bg: #FFFFFF;
+    --card-border: #DDD5CD;
+    --primary-color: #EFE8E1;
+    --secondary-color: #FFFFFF;
+    --accent-glow: rgba(139, 30, 63, 0.18);
+    --cyan-color: #C95C78;
     
-    --nav-bg: rgba(248, 247, 255, 0.8);
-    --footer-bg: #ffffff;
-    --card-content-bg: rgba(255, 255, 255, 0.9);
-    --card-content-border: rgba(0, 0, 0, 0.08);
-    --text-muted: #4a4a5a;     /* Darker muted text */
-    --btn-primary-text: #ffffff;
+    --nav-bg: rgba(247, 243, 238, 0.85);
+    --footer-bg: #EFE8E1;
+    --card-content-bg: #FFFFFF;
+    --card-content-border: #DDD5CD;
+    --btn-primary-text: #FFFFFF;
 }
 
 /* Theme Toggle Button */
@@ -81,6 +87,7 @@ body {
 h1, h2, h3, h4 {
     font-family: var(--font-serif);
     font-weight: 400;
+    color: var(--headings-color);
 }
 
 .container {

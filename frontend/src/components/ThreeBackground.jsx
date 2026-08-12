@@ -128,7 +128,7 @@ const ThreeBackground = () => {
       const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
       
       // Clear canvas with a solid background matching active theme
-      ctx.fillStyle = isDark ? '#0b0b14' : '#f8f7ff';
+      ctx.fillStyle = isDark ? '#080A12' : '#F7F3EE';
       ctx.shadowBlur = 0;
       ctx.fillRect(0, 0, width, height);
  
@@ -145,19 +145,19 @@ const ThreeBackground = () => {
         // Dynamic blob colors based on theme
         let blobColor;
         if (isDark) {
-          if (idx === 0) blobColor = 'rgba(139, 124, 255, 0.08)';    // Purple ambient
-          else if (idx === 1) blobColor = 'rgba(255, 107, 157, 0.07)';   // Pink ambient
-          else blobColor = 'rgba(32, 217, 195, 0.05)';                  // Teal ambient
+          if (idx === 0) blobColor = 'rgba(124, 111, 232, 0.08)';    // 3D accent #7C6FE8
+          else if (idx === 1) blobColor = 'rgba(139, 30, 63, 0.07)';   // Primary accent #8B1E3F
+          else blobColor = 'rgba(217, 107, 138, 0.05)';                  // Accent highlight #D96B8A
         } else {
-          if (idx === 0) blobColor = 'rgba(108, 99, 255, 0.06)';
-          else if (idx === 1) blobColor = 'rgba(255, 107, 157, 0.05)';
-          else blobColor = 'rgba(0, 194, 168, 0.04)';
+          if (idx === 0) blobColor = 'rgba(117, 104, 201, 0.06)';      // 3D accent #7568C9
+          else if (idx === 1) blobColor = 'rgba(139, 30, 63, 0.05)';   // Primary accent #8B1E3F
+          else blobColor = 'rgba(201, 92, 120, 0.04)';                  // Accent highlight #C95C78
         }
  
         // Create gradient
         const gradient = ctx.createRadialGradient(blob.x, blob.y, 0, blob.x, blob.y, blob.radius);
         gradient.addColorStop(0, blobColor);
-        gradient.addColorStop(1, isDark ? 'rgba(11, 11, 20, 0)' : 'rgba(248, 247, 255, 0)');
+        gradient.addColorStop(1, isDark ? 'rgba(8, 10, 18, 0)' : 'rgba(247, 243, 238, 0)');
  
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, width, height);

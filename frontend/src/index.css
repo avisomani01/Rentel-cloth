@@ -1,19 +1,21 @@
 :root {
-    --primary: #d4af37;      /* Champagne Gold */
-    --secondary: #1a1a24;    /* Premium Slate */
-    --accent: #c5a880;       /* Muted Warm Gold */
-    --yellow: #ffd166;       /* Pastel yellow */
-    --background: #0b0b14;   /* Deep space-black background */
-    --text: #f3f3f5;         /* Refined soft white text */
-    --text-muted: #a9a6b9;   /* Muted grey/violet text */
-    --white: #101016;        /* Dark slate card solid background */
-    --nav-bg: rgba(6, 6, 9, 0.75);
-    --footer-bg: rgba(11, 7, 26, 0.95);
+    --primary: #8B1E3F;      /* Primary accent */
+    --secondary: #101525;    /* Secondary background */
+    --accent: #D96B8A;       /* Accent highlight */
+    --accent-3d: #7C6FE8;    /* 3D accent */
+    --yellow: #ffd166;       /* Keep rating stars yellow */
+    --background: #080A12;   /* Background */
+    --text: #F5F1EA;         /* Primary text */
+    --text-muted: #AEB6C8;   /* Secondary text */
+    --headings: #E8CFA8;     /* Headings */
+    --white: #151B2E;        /* Cards container base */
+    --nav-bg: rgba(8, 10, 18, 0.85);
+    --footer-bg: #080A12;
     
-    --card-bg: rgba(26, 26, 36, 0.45);
-    --card-border: rgba(212, 175, 55, 0.12);
-    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    --card-shadow-hover: 0 20px 40px rgba(212, 175, 55, 0.15);
+    --card-bg: #151B2E;
+    --card-border: #2A3148;
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    --card-shadow-hover: 0 20px 40px rgba(139, 30, 63, 0.15);
     
     --font-sans: 'Outfit', sans-serif;
     --font-serif: 'Playfair Display', serif;
@@ -21,18 +23,22 @@
 }
 
 [data-theme="light"] {
-    --background: #fbfbfa;   /* Warm off-white background */
-    --text: #1a1a24;         /* Premium dark slate text */
-    --text-muted: #4a4a5a;   /* Readable muted text for light theme */
-    --white: #ffffff;        /* Clean pure white card solid background */
-    --nav-bg: rgba(251, 251, 250, 0.8);
-    --footer-bg: rgba(244, 243, 239, 0.95);
-    --secondary: #d4af37;    /* Secondary warm gold */
+    --primary: #8B1E3F;      /* Primary accent */
+    --secondary: #EFE8E1;    /* Secondary background */
+    --accent: #C95C78;       /* Accent highlight */
+    --accent-3d: #7568C9;    /* 3D accent */
+    --background: #F7F3EE;   /* Background */
+    --text: #171A2B;         /* Primary text */
+    --text-muted: #62697A;   /* Secondary text */
+    --headings: #651B34;     /* Headings */
+    --white: #FFFFFF;        /* Cards container base */
+    --nav-bg: rgba(247, 243, 238, 0.85);
+    --footer-bg: #EFE8E1;
     
-    --card-bg: rgba(255, 255, 255, 0.75);
-    --card-border: rgba(212, 175, 55, 0.22);
-    --card-shadow: 0 10px 30px rgba(16, 16, 22, 0.06);
-    --card-shadow-hover: 0 20px 40px rgba(212, 175, 55, 0.15);
+    --card-bg: #FFFFFF;
+    --card-border: #DDD5CD;
+    --card-shadow: 0 10px 30px rgba(16, 16, 22, 0.05);
+    --card-shadow-hover: 0 20px 40px rgba(139, 30, 63, 0.12);
 }
 
 * {
@@ -53,6 +59,7 @@ body {
 h1, h2, h3, h4 {
     font-family: var(--font-serif);
     font-weight: 600;
+    color: var(--headings);
 }
 
 .container {

@@ -196,7 +196,7 @@ const DressDetails = () => {
         }
         .dress-desc {
           font-size: 1.05rem;
-          color: #505060;
+          color: var(--text-muted);
           line-height: 1.8;
         }
         .options-section {
@@ -213,7 +213,7 @@ const DressDetails = () => {
           font-size: 0.85rem;
           text-transform: uppercase;
           letter-spacing: 1.5px;
-          color: #606070;
+          color: var(--text-muted);
           margin-bottom: 0.8rem;
           font-weight: 700;
         }
@@ -263,7 +263,7 @@ const DressDetails = () => {
           font-size: 0.85rem;
           text-transform: uppercase;
           letter-spacing: 1px;
-          color: #606070;
+          color: var(--text-muted);
           font-weight: 600;
         }
         .date-input input {
@@ -290,7 +290,7 @@ const DressDetails = () => {
         .price-row {
           display: flex;
           justify-content: space-between;
-          color: #606070;
+          color: var(--text-muted);
         }
         .price-row.total {
           font-size: 1.4rem;

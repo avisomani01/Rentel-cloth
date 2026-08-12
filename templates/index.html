@@ -251,25 +251,9 @@
                 },
                 undefined,
                 function(error) {
-                    console.warn('GLB asset not found or failed to load. Displaying unavailable state.', error);
+                    console.warn('GLB asset not found or failed to load.', error);
                     hideLoader();
-                    
-                    // Hide WebGL canvas and show error div
                     canvas.style.display = 'none';
-                    
-                    const errorDiv = document.createElement('div');
-                    errorDiv.innerText = "3D garment unavailable";
-                    errorDiv.style.fontFamily = "var(--font-sans)";
-                    errorDiv.style.fontSize = "1.2rem";
-                    errorDiv.style.color = "#ef4444";
-                    errorDiv.style.fontWeight = "500";
-                    errorDiv.style.textAlign = "center";
-                    errorDiv.style.padding = "2rem";
-                    
-                    container.appendChild(errorDiv);
-                    container.style.display = 'flex';
-                    container.style.alignItems = 'center';
-                    container.style.justifyContent = 'center';
                 }
             );
 

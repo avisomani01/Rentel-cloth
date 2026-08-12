@@ -189,19 +189,8 @@ const HeroThreeDViewer = () => {
 
   return (
     <div ref={containerRef} style={{ width: '100%', height: '100%', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      {!hasError ? (
+      {!hasError && (
         <canvas ref={canvasRef} style={{ width: '100%', height: '100%', display: 'block', zIndex: 5, position: 'relative' }}></canvas>
-      ) : (
-        <div style={{
-          fontFamily: 'var(--font-sans)',
-          fontSize: '1.2rem',
-          color: '#ef4444',
-          fontWeight: '500',
-          textAlign: 'center',
-          padding: '2rem'
-        }}>
-          3D garment unavailable
-        </div>
       )}
       {loading && !hasError && (
         <div style={{

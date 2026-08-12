@@ -1,26 +1,26 @@
 :root {
     --primary: #8B1E3F;      /* Brand Burgundy */
-    --secondary: #121521;    /* Secondary surface */
-    --accent: #E5B7C3;       /* Heading accent */
-    --accent-highlight: #A83D5D;
+    --secondary: #131620;    /* Secondary surface */
+    --accent: #D88A9D;       /* Heading accent */
+    --accent-highlight: #A64260;
     --accent-3d: #7467C8;    /* Subtle violet */
     --yellow: #ffd166;       /* Keep rating stars yellow */
-    --background: #090A10;   /* Background */
-    --text: #F7F2EA;         /* Primary text */
-    --text-muted: #B8BDCA;   /* Secondary text */
-    --headings: #F7F2EA;     /* Headings */
-    --white: #171B29;        /* Cards container base */
-    --nav-bg: rgba(9, 10, 16, 0.82);
-    --footer-bg: #090A10;
+    --background: #0B0C12;   /* Background */
+    --text: #F5F0E8;         /* Primary text */
+    --text-muted: #B8BBC5;   /* Secondary text */
+    --headings: #F5F0E8;     /* Headings */
+    --white: #181B25;        /* Cards container base */
+    --nav-bg: rgba(11, 12, 18, 0.82);
+    --footer-bg: #0B0C12;
     
-    --card-bg: #171B29;
+    --card-bg: #181B25;
     --card-border: #292E3D;
     --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     --card-shadow-hover: 0 20px 40px rgba(139, 30, 63, 0.25);
     
-    --input-bg: #121521;
+    --input-bg: #131620;
     --input-border: #292E3D;
-    --input-text: #F7F2EA;
+    --input-text: #F5F0E8;
     --input-placeholder: #7F8696;
     
     --success: #48B89A;
@@ -28,16 +28,11 @@
     --warning: #D8B88C;
     
     --bg-gradient: radial-gradient(
-        circle at 75% 30%,
-        rgba(116, 103, 200, 0.10),
-        transparent 28%
+        ellipse at 75% 30%,
+        rgba(139, 30, 63, 0.10),
+        transparent 40%
     ),
-    radial-gradient(
-        circle at 20% 75%,
-        rgba(139, 30, 63, 0.12),
-        transparent 28%
-    ),
-    #090A10;
+    #0B0C12;
     
     --font-sans: 'Outfit', sans-serif;
     --font-serif: 'Playfair Display', serif;
@@ -47,24 +42,24 @@
 [data-theme="light"] {
     --primary: #8B1E3F;      /* Brand Burgundy */
     --secondary: #F0EBE5;    /* Secondary surface */
-    --accent: #7A203C;       /* Heading accent */
-    --accent-highlight: #A83D5D;
-    --accent-3d: #7669B8;    /* Subtle violet */
-    --background: #F8F5F0;   /* Background */
+    --accent: #8B1E3F;       /* Heading accent */
+    --accent-highlight: #A64260;
+    --accent-3d: #B5A9C8;    /* Subtle lavender */
+    --background: #F6F2EC;   /* Background */
     --text: #171923;         /* Primary text */
-    --text-muted: #626775;   /* Secondary text */
+    --text-muted: #555B68;   /* Secondary text */
     --headings: #171923;     /* Headings */
     --white: #FFFFFF;        /* Cards container base */
-    --nav-bg: rgba(248, 245, 240, 0.88);
+    --nav-bg: rgba(246, 242, 236, 0.82);
     --footer-bg: #F0EBE5;
     
     --card-bg: #FFFFFF;
-    --card-border: #DDD7D0;
-    --card-shadow: 0 10px 30px rgba(16, 16, 22, 0.05);
+    --card-border: #E4DDD5;
+    --card-shadow: 0 8px 30px rgba(30, 25, 20, 0.06);
     --card-shadow-hover: 0 20px 40px rgba(139, 30, 63, 0.12);
     
     --input-bg: #FFFFFF;
-    --input-border: #DDD7D0;
+    --input-border: #E4DDD5;
     --input-text: #171923;
     --input-placeholder: #858A96;
     
@@ -73,16 +68,26 @@
     --warning: #9A6F38;
     
     --bg-gradient: radial-gradient(
-        circle at 80% 20%,
-        rgba(118, 105, 184, 0.08),
-        transparent 28%
+        circle at 90% 10%,
+        rgba(198, 167, 125, 0.06),
+        transparent 35%
     ),
     radial-gradient(
-        circle at 15% 80%,
-        rgba(139, 30, 63, 0.07),
-        transparent 28%
+        circle at 10% 90%,
+        rgba(184, 92, 118, 0.05),
+        transparent 35%
     ),
-    #F8F5F0;
+    radial-gradient(
+        circle at 50% 50%,
+        rgba(139, 30, 63, 0.05),
+        transparent 45%
+    ),
+    linear-gradient(
+        135deg,
+        #FBF8F4 0%,
+        #F5F0EA 45%,
+        #EFE7E1 100%
+    );
 }
 
 * {
@@ -172,7 +177,7 @@ h1, h2, h3, h4 {
     cursor: pointer;
     transition: var(--transition);
     border: none;
-    box-shadow: 0 4px 12px rgba(139, 30, 63, 0.15);
+    box-shadow: 0 8px 25px rgba(139, 30, 63, 0.18);
 }
 
 .btn-primary {
@@ -183,7 +188,7 @@ h1, h2, h3, h4 {
 .btn-primary:hover {
     transform: translateY(-2px);
     background: var(--accent-highlight);
-    box-shadow: 0 6px 16px rgba(139, 30, 63, 0.25);
+    box-shadow: 0 8px 25px rgba(139, 30, 63, 0.28);
 }
 
 .btn-secondary {
@@ -412,7 +417,7 @@ section {
 .collection-card:hover {
     transform: translateY(-8px) rotateX(2deg) rotateY(2deg);
     box-shadow: var(--card-shadow-hover);
-    border-color: rgba(255, 0, 127, 0.35);
+    border-color: var(--primary);
 }
 
 .card-inner-img-wrapper {

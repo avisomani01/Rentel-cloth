@@ -118,7 +118,7 @@ const DressDetails = () => {
           margin: 0 auto 60px;
           padding: 0 2rem;
           display: grid;
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns: 0.9fr 1.1fr;
           gap: 4rem;
           align-items: start;
         }

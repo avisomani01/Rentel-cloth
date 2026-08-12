@@ -16,19 +16,19 @@ const ThreeBackground = () => {
 
     // Color palettes matching active themes
     const darkColors = [
-      'rgba(212, 175, 55, ',  // Champagne Gold
-      'rgba(35, 30, 61, ',    // Deep Space Indigo
-      'rgba(197, 168, 128, ', // Muted Warm Gold
+      'rgba(139, 30, 63, ',   // Brand Burgundy #8B1E3F
+      'rgba(210, 181, 141, ',  // Champagne #D2B58D
+      'rgba(216, 138, 157, ',  // Rose #D88A9D
     ];
 
     const lightColors = [
-      'rgba(108, 99, 255, ',  // Indigo
-      'rgba(255, 107, 157, ', // Coral Pink
-      'rgba(0, 194, 168, ',   // Mint/Teal
+      'rgba(139, 30, 63, ',   // Brand Burgundy #8B1E3F
+      'rgba(198, 167, 125, ',  // Champagne #C6A77D
+      'rgba(184, 92, 118, ',   // Rose #B85C76
     ];
 
     // Particle settings
-    const particleCount = 100;
+    const particleCount = 70; // Slightly lower count for elegant sparse look
     const particles = [];
     const perspective = 300;
     const maxDepth = 1000;
@@ -38,13 +38,6 @@ const ThreeBackground = () => {
     let mouseY = 0;
     let targetMouseX = 0;
     let targetMouseY = 0;
-
-    // Nebula blob settings (for background gradient light)
-    const blobs = [
-      { x: width * 0.2, y: height * 0.3, radius: 300, vx: 0.2, vy: 0.15 },
-      { x: width * 0.8, y: height * 0.7, radius: 350, vx: -0.15, vy: -0.2 },
-      { x: width * 0.5, y: height * 0.5, radius: 250, vx: 0.1, vy: -0.1 },
-    ];
 
     class Particle {
       constructor() {
@@ -127,41 +120,8 @@ const ThreeBackground = () => {
     const animate = () => {
       const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
       
-      // Clear canvas with a solid background matching active theme
-      ctx.fillStyle = isDark ? '#090A10' : '#F8F5F0';
-      ctx.shadowBlur = 0;
-      ctx.fillRect(0, 0, width, height);
- 
-      // 1. Draw and move Nebula gradients
-      blobs.forEach((blob, idx) => {
-        // Move blobs slowly
-        blob.x += blob.vx;
-        blob.y += blob.vy;
- 
-        // Bounce blobs off walls
-        if (blob.x - blob.radius < 0 || blob.x + blob.radius > width) blob.vx *= -1;
-        if (blob.y - blob.radius < 0 || blob.y + blob.radius > height) blob.vy *= -1;
- 
-        // Dynamic blob colors based on theme
-        let blobColor;
-        if (isDark) {
-          if (idx === 0) blobColor = 'rgba(116, 103, 200, 0.07)';    // Subtle Violet #7467C8
-          else if (idx === 1) blobColor = 'rgba(139, 30, 63, 0.08)';   // Brand Burgundy #8B1E3F
-          else blobColor = 'rgba(229, 183, 195, 0.05)';                  // Heading accent #E5B7C3
-        } else {
-          if (idx === 0) blobColor = 'rgba(118, 105, 184, 0.06)';      // Subtle Violet #7669B8
-          else if (idx === 1) blobColor = 'rgba(139, 30, 63, 0.06)';   // Brand Burgundy #8B1E3F
-          else blobColor = 'rgba(181, 138, 88, 0.04)';                  // Champagne #B58A58
-        }
- 
-        // Create gradient
-        const gradient = ctx.createRadialGradient(blob.x, blob.y, 0, blob.x, blob.y, blob.radius);
-        gradient.addColorStop(0, blobColor);
-        gradient.addColorStop(1, isDark ? 'rgba(9, 10, 16, 0)' : 'rgba(248, 245, 240, 0)');
- 
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, width, height);
-      });
+      // Clear canvas to transparent so CSS background gradients show through
+      ctx.clearRect(0, 0, width, height);
 
       // Smooth mouse coordinates for momentum-based parallax
       mouseX += (targetMouseX - mouseX) * 0.08;

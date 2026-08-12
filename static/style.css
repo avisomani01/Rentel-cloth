@@ -1,29 +1,29 @@
 :root, [data-theme="dark"] {
-    --bg-color: #090A10;
-    --secondary-bg: #121521;
-    --card-bg: #171B29;
-    --text-color: #F7F2EA;
-    --text-muted: #B8BDCA;
-    --headings-color: #F7F2EA;
-    --headings-accent: #E5B7C3;
+    --bg-color: #0B0C12;
+    --secondary-bg: #131620;
+    --card-bg: #181B25;
+    --text-color: #F5F0E8;
+    --text-muted: #B8BBC5;
+    --headings-color: #F5F0E8;
+    --headings-accent: #D88A9D;
     --accent-color: #8B1E3F;
-    --accent-highlight: #A83D5D;
+    --accent-highlight: #A64260;
     --accent-3d: #7467C8;
     --card-border: #292E3D;
-    --primary-color: #121521;
-    --secondary-color: #171B29;
-    --accent-glow: rgba(116, 103, 200, 0.10);
-    --cyan-color: #A83D5D;
+    --primary-color: #131620;
+    --secondary-color: #181B25;
+    --accent-glow: rgba(139, 30, 63, 0.10);
+    --cyan-color: #A64260;
     
-    --nav-bg: rgba(9, 10, 16, 0.82);
-    --footer-bg: #090A10;
-    --card-content-bg: #121521;
+    --nav-bg: rgba(11, 12, 18, 0.82);
+    --footer-bg: #0B0C12;
+    --card-content-bg: #131620;
     --card-content-border: #292E3D;
     --btn-primary-text: #FFFFFF;
     
-    --input-bg: #121521;
+    --input-bg: #131620;
     --input-border: #292E3D;
-    --input-text: #F7F2EA;
+    --input-text: #F5F0E8;
     --input-placeholder: #7F8696;
     
     --success-color: #48B89A;
@@ -31,46 +31,41 @@
     --warning-color: #D8B88C;
     
     --bg-gradient: radial-gradient(
-        circle at 75% 30%,
-        rgba(116, 103, 200, 0.10),
-        transparent 28%
+        ellipse at 75% 30%,
+        rgba(139, 30, 63, 0.10),
+        transparent 40%
     ),
-    radial-gradient(
-        circle at 20% 75%,
-        rgba(139, 30, 63, 0.12),
-        transparent 28%
-    ),
-    #090A10;
+    #0B0C12;
 
     --font-sans: 'Outfit', sans-serif;
     --font-serif: 'Playfair Display', serif;
 }
 
 [data-theme="light"] {
-    --bg-color: #F8F5F0;
+    --bg-color: #F6F2EC;
     --secondary-bg: #F0EBE5;
     --card-bg: #FFFFFF;
     --text-color: #171923;
-    --text-muted: #626775;
+    --text-muted: #555B68;
     --headings-color: #171923;
-    --headings-accent: #7A203C;
+    --headings-accent: #8B1E3F;
     --accent-color: #8B1E3F;
-    --accent-highlight: #A83D5D;
-    --accent-3d: #7669B8;
-    --card-border: #DDD7D0;
+    --accent-highlight: #A64260;
+    --accent-3d: #B5A9C8;
+    --card-border: #E4DDD5;
     --primary-color: #F0EBE5;
     --secondary-color: #FFFFFF;
-    --accent-glow: rgba(118, 105, 184, 0.08);
-    --cyan-color: #A83D5D;
+    --accent-glow: rgba(139, 30, 63, 0.08);
+    --cyan-color: #A64260;
     
-    --nav-bg: rgba(248, 245, 240, 0.88);
+    --nav-bg: rgba(246, 242, 236, 0.82);
     --footer-bg: #F0EBE5;
     --card-content-bg: #FFFFFF;
-    --card-content-border: #DDD7D0;
+    --card-content-border: #E4DDD5;
     --btn-primary-text: #FFFFFF;
     
     --input-bg: #FFFFFF;
-    --input-border: #DDD7D0;
+    --input-border: #E4DDD5;
     --input-text: #171923;
     --input-placeholder: #858A96;
     
@@ -79,16 +74,26 @@
     --warning-color: #9A6F38;
     
     --bg-gradient: radial-gradient(
-        circle at 80% 20%,
-        rgba(118, 105, 184, 0.08),
-        transparent 28%
+        circle at 90% 10%,
+        rgba(198, 167, 125, 0.06),
+        transparent 35%
     ),
     radial-gradient(
-        circle at 15% 80%,
-        rgba(139, 30, 63, 0.07),
-        transparent 28%
+        circle at 10% 90%,
+        rgba(184, 92, 118, 0.05),
+        transparent 35%
     ),
-    #F8F5F0;
+    radial-gradient(
+        circle at 50% 50%,
+        rgba(139, 30, 63, 0.05),
+        transparent 45%
+    ),
+    linear-gradient(
+        135deg,
+        #FBF8F4 0%,
+        #F5F0EA 45%,
+        #EFE7E1 100%
+    );
 }
 
 /* Theme Toggle Button */
@@ -219,14 +224,14 @@ h1, h2, h3, h4 {
 .btn-primary {
     background: var(--accent-color);
     color: var(--btn-primary-text);
-    box-shadow: 0 4px 12px rgba(139, 30, 63, 0.15);
+    box-shadow: 0 8px 25px rgba(139, 30, 63, 0.18);
     font-weight: 700;
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
     background: var(--accent-highlight);
-    box-shadow: 0 6px 16px rgba(139, 30, 63, 0.25);
+    box-shadow: 0 8px 25px rgba(139, 30, 63, 0.28);
     filter: none;
 }
 
@@ -271,7 +276,7 @@ h1, h2, h3, h4 {
 }
 
 .hero-title span {
-    color: var(--accent-color);
+    color: var(--headings-accent);
     font-style: italic;
 }
 
@@ -305,7 +310,7 @@ h1, h2, h3, h4 {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    filter: drop-shadow(0 30px 30px rgba(0,0,0,0.8));
+    filter: drop-shadow(0 20px 25px rgba(0,0,0,0.35));
     position: relative;
     z-index: 2;
 }
@@ -317,9 +322,9 @@ h1, h2, h3, h4 {
     transform: translate(-50%, -50%);
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle, var(--accent-glow) 0%, rgba(0,0,0,0) 70%);
+    background: radial-gradient(ellipse at center, rgba(139, 30, 63, 0.08), transparent 55%);
     z-index: 1;
-    filter: blur(50px);
+    filter: none;
 }
 
 /* Common Section Styles */

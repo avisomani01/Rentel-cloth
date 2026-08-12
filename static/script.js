@@ -2,35 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let vantaEffect = null;
     
-    // 1. Function to initialize or update Vanta.js 3D Background
+    // 1. Function to initialize or update Vanta.js 3D Background (Stubbed to support clean static luxury editorial background)
     function updateVantaFog(theme) {
-        if (typeof VANTA === 'undefined') return;
-        
-        const isDark = theme === 'dark';
-        const config = {
-            el: "#vanta-bg",
-            mouseControls: true,
-            touchControls: true,
-            gyroControls: false,
-            minHeight: 200.00,
-            minWidth: 200.00,
-            highlightColor: isDark ? 0x7467c8 : 0x7669b8, // Subtle Violet: #7467C8 vs #7669B8
-            midtoneColor: isDark ? 0x8b1e3f : 0x8b1e3f,   // Brand Burgundy: #8B1E3F
-            lowlightColor: isDark ? 0x121521 : 0xf0ebe5,   // Secondary surface: #121521 vs #F0EBE5
-            baseColor: isDark ? 0x090a10 : 0xf8f5f0,       // Background base: #090A10 vs #F8F5F0
-            blurFactor: 0.85,
-            speed: isDark ? 0.60 : 1.20,
-            zoom: 1.10
-        };
-
-        if (document.querySelector("#vanta-bg")) {
-            if (vantaEffect) {
-                // If it already exists, update options dynamically
-                vantaEffect.setOptions(config);
-            } else {
-                // Initialize the effect
-                vantaEffect = VANTA.FOG(config);
-            }
+        if (vantaEffect) {
+            vantaEffect.destroy();
+            vantaEffect = null;
         }
     }
 

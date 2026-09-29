@@ -34,8 +34,8 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="logo">
-        <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }} title="Go to Home">
-          <img src="/logo.png" alt="3D Logo" style={{ height: '42px', width: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 2px 10px rgba(0,0,0,0.4))' }} />
+        <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }} title="WearLoop - Luxury Fashion Rental">
+          <img src="/logo.png?v=2" alt="WearLoop Logo" style={{ height: '42px', width: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 2px 10px rgba(0,0,0,0.35))' }} />
         </Link>
       </div>
 

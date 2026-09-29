@@ -12,7 +12,7 @@
     <!-- Atropos 3D CSS -->
     <link rel="stylesheet" href="https://unpkg.com/atropos@2.0.2/atropos.min.css" />
     
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=7">
     
     <!-- Prevent theme flash -->
     <script>
@@ -24,10 +24,10 @@
 </head>
 <body>
     <nav class="navbar">
-        <a href="{{ url_for('index') }}" class="logo" style="text-decoration: none; display: flex; align-items: center;" title="Go to Home">
-            <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="3D Logo" style="height: 42px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 10px rgba(0,0,0,0.4));">
+        <a href="{{ url_for('index') }}" class="logo" title="WearLoop - Luxury Fashion Rental">
+            <img src="{{ url_for('static', filename='assets/logo.png') }}?v=2" alt="WearLoop Logo">
         </a>
-        <ul class="nav-links" style="align-items: center; display: flex; gap: 2.5rem;">
+        <ul class="nav-links">
             <li><a href="{{ url_for('collection_all') }}">Collection</a></li>
             <li><a href="{{ url_for('lend_clothes') }}">Lend Clothes</a></li>
             {% if current_user.is_authenticated %}
@@ -44,39 +44,192 @@
         </ul>
     </nav>
 
-    <!-- Vanta 3D Background Container -->
-    <header id="vanta-bg" class="hero">
+    <!-- Hero Section -->
+    <header id="vanta-bg" class="hero" style="background:transparent;">
         <div class="hero-content fade-in">
+            <span class="editorial-eyebrow">Haute Couture & Bespoke Rentals</span>
             <h1 class="hero-title">Redefine Your <span>Style</span></h1>
-            <p class="hero-subtitle">Rent high-end, designer fashion for any occasion. Experience clothing like never before in full 3D.</p>
-            <div class="hero-actions">
+            <p class="hero-subtitle">Rent high-end designer gowns, tailored tuxedos, and runway statements for your defining moments. Experience fashion in full interactive 3D.</p>
+            <div class="hero-actions" style="display: flex; gap: 1rem; flex-wrap: wrap;">
                 <a href="{{ url_for('collection_all') }}" class="btn btn-primary">Start Renting</a>
+                <a href="#editions" class="btn btn-outline">Explore Editions</a>
             </div>
         </div>
-        <div class="hero-3d-container fade-in" style="width: 100%; height: 500px; display: flex; align-items: center; justify-content: center; position: relative; padding: 1rem;">
-            <img src="{{ url_for('static', filename='images/gown_tuxedo.png') }}" alt="Luxury Burgundy Evening Gown and Tailored Black Tuxedo" style="max-height: 95%; max-width: 95%; object-fit: contain; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 50px rgba(139,124,255,0.15); border: 1px solid rgba(255,255,255,0.06);">
+        <div class="hero-3d-container fade-in" style="width: 100%; height: 520px; display: flex; align-items: center; justify-content: center; position: relative; padding: 1rem;">
+            <img src="{{ url_for('static', filename='images/hero_opening_real.jpg') }}" alt="Haute Couture Evening Wear and Bespoke Tailored Tuxedo" style="max-height: 100%; max-width: 95%; object-fit: cover; border-radius: 20px; box-shadow: 0 24px 60px rgba(0,0,0,0.35); border: 1px solid var(--card-border);">
         </div>
     </header>
 
+    <!-- Curated Editorial Editions -->
+    <section id="editions" class="editorial-section">
+        <div class="container fade-in">
+            <div class="editorial-header">
+                <span class="editorial-eyebrow">Curated Collections</span>
+                <h2 class="section-title">The Seasonal <span>Editions</span></h2>
+                <p class="section-subtitle">Editorial portfolios tailored for red carpets, galas, and defining celebrations.</p>
+            </div>
+            <div class="editorial-grid">
+                <!-- Card 1: Gala -->
+                <a href="{{ url_for('collection_all') }}" class="editorial-card stagger-in">
+                    <div class="editorial-card-img-wrap">
+                        <img src="{{ url_for('static', filename='images/editorial_gala.jpg') }}" alt="Black Tie and Gala Gowns" class="editorial-card-img" loading="lazy">
+                    </div>
+                    <div class="editorial-card-overlay"></div>
+                    <div class="editorial-card-content">
+                        <span class="editorial-card-tag">01 / Black Tie & Gala</span>
+                        <h3 class="editorial-card-title">Evening Gowns</h3>
+                        <p class="editorial-card-desc">Fluid silk silhouettes and architectural gowns crafted for grand entrances.</p>
+                        <span class="editorial-card-cta">Explore Edit &rarr;</span>
+                    </div>
+                </a>
+
+                <!-- Card 2: Suiting -->
+                <a href="{{ url_for('collection_all') }}" class="editorial-card stagger-in">
+                    <div class="editorial-card-img-wrap">
+                        <img src="{{ url_for('static', filename='images/editorial_suit.jpg') }}" alt="Bespoke Tailored Suits and Tuxedos" class="editorial-card-img" loading="lazy">
+                    </div>
+                    <div class="editorial-card-overlay"></div>
+                    <div class="editorial-card-content">
+                        <span class="editorial-card-tag">02 / Tailored Suiting</span>
+                        <h3 class="editorial-card-title">Bespoke Tuxedos</h3>
+                        <p class="editorial-card-desc">Sharp Italian wool blazers and velvet black-tie suiting for distinguished occasions.</p>
+                        <span class="editorial-card-cta">Explore Edit &rarr;</span>
+                    </div>
+                </a>
+
+                <!-- Card 3: Cocktail -->
+                <a href="{{ url_for('collection_all') }}" class="editorial-card stagger-in">
+                    <div class="editorial-card-img-wrap">
+                        <img src="{{ url_for('static', filename='images/editorial_cocktail.jpg') }}" alt="Cocktail and Soirée Fashion" class="editorial-card-img" loading="lazy">
+                    </div>
+                    <div class="editorial-card-overlay"></div>
+                    <div class="editorial-card-content">
+                        <span class="editorial-card-tag">03 / Cocktail & Soirée</span>
+                        <h3 class="editorial-card-title">Modern Chic</h3>
+                        <p class="editorial-card-desc">Effortless silk slips, striking party silhouettes, and contemporary evening wear.</p>
+                        <span class="editorial-card-cta">Explore Edit &rarr;</span>
+                    </div>
+                </a>
+
+                <!-- Card 4: Couture -->
+                <a href="{{ url_for('collection_all') }}" class="editorial-card stagger-in">
+                    <div class="editorial-card-img-wrap">
+                        <img src="{{ url_for('static', filename='images/editorial_couture.jpg') }}" alt="Runway and Rare Archive Fashion" class="editorial-card-img" loading="lazy">
+                    </div>
+                    <div class="editorial-card-overlay"></div>
+                    <div class="editorial-card-content">
+                        <span class="editorial-card-tag">04 / Limited Archive</span>
+                        <h3 class="editorial-card-title">Haute Couture</h3>
+                        <p class="editorial-card-desc">Rare designer archive statements and intricate embroidery for visionary styling.</p>
+                        <span class="editorial-card-cta">Explore Edit &rarr;</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Pieces in The Vault -->
+    <section id="collection" class="featured-collection-section">
+        <div class="container fade-in">
+            <div class="featured-collection-header">
+                <span class="editorial-eyebrow">Coveted Pieces</span>
+                <h2 class="section-title">Featured in <span>The Vault</span></h2>
+                <p class="section-subtitle">Experience our most requested designer garments in interactive 3D.</p>
+            </div>
+            <div class="cards-container">
+                {% for dress in dresses[:3] %}
+                <a href="{{ url_for('detail', dress_id=dress.id) }}" class="collection-card-link stagger-in" style="text-decoration: none; color: inherit; display: block;">
+                    <div class="atropos my-atropos collection-card">
+                        <div class="atropos-scale">
+                            <div class="atropos-rotate">
+                                <div class="atropos-inner card-inner">
+                                    <div class="card-bg" data-atropos-offset="-5"></div>
+                                    <img src="{{ url_for('static', filename='assets/' ~ dress.image_file) }}" alt="{{ dress.name }}" class="card-image" data-atropos-offset="8" style="{{ dress.css_filter }}">
+                                    <div class="card-content" data-atropos-offset="3">
+                                        <h3>{{ dress.name }}</h3>
+                                        <p>{{ dress.description }}</p>
+                                        <div class="card-footer">
+                                            <span class="price">₹{{ dress.price_per_day }} / day</span>
+                                            <span class="btn btn-small">Rent Now</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            <div class="featured-collection-footer">
+                <a href="{{ url_for('collection_all') }}" class="btn btn-outline" style="padding: 1rem 2.5rem;">Explore Full Collection ({{ dresses|length }}+ Pieces) &rarr;</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Editorial Story / Brand Philosophy -->
+    <section id="philosophy" class="editorial-story-section">
+        <div class="editorial-story-container fade-in">
+            <div class="story-visual-wrap">
+                <img src="{{ url_for('static', filename='images/editorial_story.jpg') }}" alt="WearLoop Luxury Fashion Atelier" class="story-img" loading="lazy">
+                <div class="story-badge">
+                    <span class="story-badge-dot"></span>
+                    <span>WearLoop Atelier &bull; 100% Verified Couture</span>
+                </div>
+            </div>
+            <div class="story-content">
+                <span class="editorial-eyebrow">The Atelier Standard</span>
+                <h2>Luxury Without Excess. <span>Wear The Unattainable.</span></h2>
+                <p class="story-lead">Accessing iconic designer fashion shouldn't demand permanent ownership. WearLoop connects collectors and style connoisseurs through a seamless, circular rental experience.</p>
+                <div class="story-features">
+                    <div class="story-feature-item">
+                        <span class="story-feature-num">01</span>
+                        <div class="story-feature-text">
+                            <h4>White-Glove Curation</h4>
+                            <p>Every piece is authenticated, hand-inspected, and delivered freshly dry-cleaned by master garment artisans.</p>
+                        </div>
+                    </div>
+                    <div class="story-feature-item">
+                        <span class="story-feature-num">02</span>
+                        <div class="story-feature-text">
+                            <h4>Effortless Doorstep Service</h4>
+                            <p>Direct courier delivery in luxury garment bags with pre-addressed, zero-waste return satchels included.</p>
+                        </div>
+                    </div>
+                    <div class="story-feature-item">
+                        <span class="story-feature-num">03</span>
+                        <div class="story-feature-text">
+                            <h4>Sustainable High Fashion</h4>
+                            <p>Keep exquisite fashion in constant circulation while actively reducing textile waste and carbon emissions.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="story-actions">
+                    <a href="{{ url_for('collection_all') }}" class="btn btn-primary">Start Renting</a>
+                    <a href="{{ url_for('lend_clothes') }}" class="btn btn-outline">Lend Your Clothes</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section id="testimonials" class="testimonials">
         <div class="container fade-in">
-            <h2 class="section-title">What They Say</h2>
-            <p class="section-subtitle">Real experiences from our community.</p>
+            <h2 class="section-title">What They <span>Say</span></h2>
+            <p class="section-subtitle">Real experiences from our patrons and style connoisseurs.</p>
             <div class="testimonial-grid">
                 <div class="testimonial-card stagger-in">
-                    <div class="stars">★★★★★</div>
-                    <p>"The 3D preview on the site is exactly what you get. The Midnight Gala Gown was perfect."</p>
-                    <h4>- Sarah J.</h4>
+                    <div class="stars" style="color: var(--headings-accent); font-size: 1.1rem; margin-bottom: 0.75rem;">★★★★★</div>
+                    <p style="font-size: 1.05rem; line-height: 1.6; margin-bottom: 1.25rem;">"The 3D preview on the site is exactly what you get. The Midnight Gala Gown was pristine and turned heads all night."</p>
+                    <h4 style="font-size: 0.95rem; font-weight: 600; color: var(--headings-color);">&mdash; Sarah J.</h4>
                 </div>
                 <div class="testimonial-card stagger-in">
-                    <div class="stars">★★★★★</div>
-                    <p>"I rented a tailored suit for my wedding. Incredible quality and effortless return process."</p>
-                    <h4>- Michael T.</h4>
+                    <div class="stars" style="color: var(--headings-accent); font-size: 1.1rem; margin-bottom: 0.75rem;">★★★★★</div>
+                    <p style="font-size: 1.05rem; line-height: 1.6; margin-bottom: 1.25rem;">"I rented a bespoke tailored tuxedo for my gala. Impeccable fit, spotless presentation, and completely effortless return."</p>
+                    <h4 style="font-size: 0.95rem; font-weight: 600; color: var(--headings-color);">&mdash; Michael T.</h4>
                 </div>
                 <div class="testimonial-card stagger-in">
-                    <div class="stars">★★★★★</div>
-                    <p>"Sustainable fashion without compromising on luxury. This is the future of dressing up."</p>
-                    <h4>- Elena R.</h4>
+                    <div class="stars" style="color: var(--headings-accent); font-size: 1.1rem; margin-bottom: 0.75rem;">★★★★★</div>
+                    <p style="font-size: 1.05rem; line-height: 1.6; margin-bottom: 1.25rem;">"Sustainable luxury without compromise. Having access to high couture without buying has transformed how I dress."</p>
+                    <h4 style="font-size: 0.95rem; font-weight: 600; color: var(--headings-color);">&mdash; Elena R.</h4>
                 </div>
             </div>
         </div>
@@ -85,42 +238,40 @@
     <footer>
         <div class="footer-content fade-in">
             <div class="footer-col">
-                <div class="footer-logo">Rented Clothes.</div>
-                <p>Sustainable, premium, and stunning fashion at your fingertips.</p>
+                <div class="footer-logo">WearLoop.</div>
+                <p>Sustainable, premium, and stunning luxury fashion rentals at your fingertips.</p>
             </div>
             <div class="footer-col">
-                <h3>Links</h3>
+                <h3>Discover</h3>
                 <ul>
                     <li><a href="#vanta-bg">Home</a></li>
-                    <li><a href="#collection">Collection</a></li>
+                    <li><a href="#editions">Curated Editions</a></li>
+                    <li><a href="#collection">The Vault</a></li>
+                    <li><a href="{{ url_for('lend_clothes') }}">Lend Clothes</a></li>
                     <li><a href="{{ url_for('faq') }}">FAQ</a></li>
                 </ul>
             </div>
             <div class="footer-col">
                 <h3>Newsletter</h3>
-                <p>Get 15% off your first rental.</p>
+                <p>Subscribe for exclusive access to new seasonal drops and private salon invitations.</p>
                 <form class="newsletter-form">
-                    <input type="email" placeholder="Your email address">
+                    <input type="email" placeholder="Your email address" aria-label="Your email address">
                     <button type="submit" class="btn btn-primary">Subscribe</button>
                 </form>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 Rented Clothes. All rights reserved.</p>
+            <p>&copy; 2026 WearLoop. All rights reserved. Redefining modern circular luxury.</p>
         </div>
     </footer>
 
-    <!-- Three.js (Required for Vanta) -->
+    <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-    <!-- Vanta.js Fog Effect -->
-    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.fog.min.js"></script>
-    
+    <!-- 3D Moving Background -->
+    <script src="{{ url_for('static', filename='bg3d.js') }}"></script>
     <!-- Atropos 3D JS -->
     <script src="https://unpkg.com/atropos@2.0.2/atropos.min.js"></script>
-    
     <!-- Custom JS -->
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-    
-
+    <script src="{{ url_for('static', filename='script.js') }}?v=3"></script>
 </body>
 </html>

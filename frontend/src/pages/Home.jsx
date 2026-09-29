@@ -76,38 +76,146 @@ const Home = () => {
           </div>
         </div>
         <div className="hero-3d-container">
-          <div style={{ position: 'relative', width: '100%', maxWidth: '420px', height: '420px' }}>
+          <div style={{ position: 'relative', width: '100%', maxWidth: '440px', height: '440px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <HeroThreeDViewer />
-            <div style={{
-              position: 'absolute',
-              top: '15%',
-              left: '10%',
-              width: '180px',
-              height: '180px',
-              borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(108,99,255,0.4) 0%, transparent 70%)',
-              filter: 'blur(30px)',
-              zIndex: 1,
-              animation: 'float-blob 8s infinite alternate ease-in-out'
-            }}></div>
-            <div style={{
-              position: 'absolute',
-              bottom: '10%',
-              right: '5%',
-              width: '220px',
-              height: '220px',
-              borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(255,107,157,0.4) 0%, transparent 70%)',
-              filter: 'blur(40px)',
-              zIndex: 1,
-              animation: 'float-blob 12s infinite alternate-reverse ease-in-out'
-            }}></div>
           </div>
         </div>
       </header>
 
+      {/* Curated Editorial Editions */}
+      <section id="editions" className="editorial-section">
+        <div className="container">
+          <div className="editorial-header">
+            <span className="editorial-eyebrow">Curated Collections</span>
+            <h2 className="section-title">The Seasonal <span>Editions</span></h2>
+            <p className="section-subtitle">Editorial portfolios tailored for red carpets, galas, and defining celebrations.</p>
+          </div>
+          <div className="editorial-grid">
+            <Link to="/collection" className="editorial-card">
+              <div className="editorial-card-img-wrap">
+                <img src="/images/editorial_gala.jpg" alt="Black Tie and Gala Gowns" className="editorial-card-img" loading="lazy" />
+              </div>
+              <div className="editorial-card-overlay"></div>
+              <div className="editorial-card-content">
+                <span className="editorial-card-tag">01 / Black Tie & Gala</span>
+                <h3 className="editorial-card-title">Evening Gowns</h3>
+                <p className="editorial-card-desc">Fluid silk silhouettes and architectural gowns crafted for grand entrances.</p>
+                <span className="editorial-card-cta">Explore Edit &rarr;</span>
+              </div>
+            </Link>
+
+            <Link to="/collection" className="editorial-card">
+              <div className="editorial-card-img-wrap">
+                <img src="/images/editorial_suit.jpg" alt="Bespoke Tailored Suits and Tuxedos" className="editorial-card-img" loading="lazy" />
+              </div>
+              <div className="editorial-card-overlay"></div>
+              <div className="editorial-card-content">
+                <span className="editorial-card-tag">02 / Tailored Suiting</span>
+                <h3 className="editorial-card-title">Bespoke Tuxedos</h3>
+                <p className="editorial-card-desc">Sharp Italian wool blazers and velvet black-tie suiting for distinguished occasions.</p>
+                <span className="editorial-card-cta">Explore Edit &rarr;</span>
+              </div>
+            </Link>
+
+            <Link to="/collection" className="editorial-card">
+              <div className="editorial-card-img-wrap">
+                <img src="/images/editorial_cocktail.jpg" alt="Cocktail and Soirée Fashion" className="editorial-card-img" loading="lazy" />
+              </div>
+              <div className="editorial-card-overlay"></div>
+              <div className="editorial-card-content">
+                <span className="editorial-card-tag">03 / Cocktail & Soirée</span>
+                <h3 className="editorial-card-title">Modern Chic</h3>
+                <p className="editorial-card-desc">Effortless silk slips, striking party silhouettes, and contemporary evening wear.</p>
+                <span className="editorial-card-cta">Explore Edit &rarr;</span>
+              </div>
+            </Link>
+
+            <Link to="/collection" className="editorial-card">
+              <div className="editorial-card-img-wrap">
+                <img src="/images/editorial_couture.jpg" alt="Runway and Rare Archive Fashion" className="editorial-card-img" loading="lazy" />
+              </div>
+              <div className="editorial-card-overlay"></div>
+              <div className="editorial-card-content">
+                <span className="editorial-card-tag">04 / Limited Archive</span>
+                <h3 className="editorial-card-title">Haute Couture</h3>
+                <p className="editorial-card-desc">Rare designer archive statements and intricate embroidery for visionary styling.</p>
+                <span className="editorial-card-cta">Explore Edit &rarr;</span>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Pieces */}
+      <section className="featured-section" style={{ padding: '4rem 5% 5rem' }}>
+        <div className="container">
+          <div className="editorial-header">
+            <span className="editorial-eyebrow">Coveted Pieces</span>
+            <h2 className="section-title">Featured in <span>The Vault</span></h2>
+            <p className="section-subtitle">Explore our most requested designer garments in interactive 3D.</p>
+          </div>
+          {loading ? (
+            <Loading message="Loading curated vault..." />
+          ) : (
+            <>
+              <DressGrid dresses={dresses.slice(0, 3)} />
+              <div style={{ textAlign: 'center', marginTop: '3.5rem' }}>
+                <Link to="/collection" className="btn btn-outline" style={{ padding: '0.9rem 2.4rem' }}>
+                  Explore Full Collection &rarr;
+                </Link>
+              </div>
+            </>
+          )}
+        </div>
+      </section>
+
+      {/* Editorial Story / Brand Philosophy */}
+      <section className="editorial-story-section">
+        <div className="editorial-story-container">
+          <div className="story-visual-wrap">
+            <img src="/images/editorial_story.jpg" alt="WearLoop Luxury Fashion Atelier" className="story-img" loading="lazy" />
+            <div className="story-badge">
+              <span className="story-badge-dot"></span>
+              <span>WearLoop Atelier &bull; 100% Verified Couture</span>
+            </div>
+          </div>
+          <div className="story-content">
+            <span className="editorial-eyebrow">The Atelier Standard</span>
+            <h2>Luxury Without Excess. <span>Wear The Unattainable.</span></h2>
+            <p className="story-lead">Accessing iconic designer fashion shouldn't demand permanent ownership. WearLoop connects collectors and style connoisseurs through a seamless, circular rental experience.</p>
+            <div className="story-features">
+              <div className="story-feature-item">
+                <span className="story-feature-num">01</span>
+                <div className="story-feature-text">
+                  <h4>White-Glove Curation</h4>
+                  <p>Every piece is authenticated, hand-inspected, and delivered freshly dry-cleaned by master garment artisans.</p>
+                </div>
+              </div>
+              <div className="story-feature-item">
+                <span className="story-feature-num">02</span>
+                <div className="story-feature-text">
+                  <h4>Effortless Doorstep Service</h4>
+                  <p>Direct courier delivery in luxury garment bags with pre-addressed, zero-waste return satchels included.</p>
+                </div>
+              </div>
+              <div className="story-feature-item">
+                <span className="story-feature-num">03</span>
+                <div className="story-feature-text">
+                  <h4>Sustainable High Fashion</h4>
+                  <p>Keep exquisite fashion in constant circulation while actively reducing textile waste and carbon emissions.</p>
+                </div>
+              </div>
+            </div>
+            <div className="story-actions">
+              <Link to="/collection" className="btn btn-primary">Start Renting</Link>
+              <Link to="/lend" className="btn btn-outline">Lend Your Clothes</Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Testimonials */}
-      <section className="testimonials" style={{ background: 'rgba(108,99,255,0.02)', padding: '5rem 5%', borderTop: '1px solid var(--card-border)' }}>
+      <section className="testimonials" style={{ padding: '5rem 5%', borderTop: '1px solid var(--card-border)' }}>
         <div className="container">
           <h2 className="section-title" style={{ fontFamily: 'var(--font-serif)', fontSize: '2.5rem' }}>LOVED BY OUR COMMUNITY</h2>
           <p className="section-subtitle">Real feedback from verified lenders and renters in VogueVault.</p>

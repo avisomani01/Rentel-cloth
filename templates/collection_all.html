@@ -11,7 +11,7 @@
     
     <!-- Atropos 3D CSS -->
     <link rel="stylesheet" href="https://unpkg.com/atropos@2.0.2/atropos.min.css" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=5">
     <!-- Prevent theme flash -->
     <script>
         (function() {
@@ -30,16 +30,24 @@
         .collection-page-header h1 {
             font-size: 3.5rem;
             margin-bottom: 1rem;
+            color: var(--headings-color);
         }
 
         .collection-page-header h1 span {
-            color: var(--accent-color);
+            color: var(--headings-accent);
             font-style: italic;
         }
 
         .collection-page-header p {
-            color: #a0a0a0;
-            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-size: 1.15rem;
+            font-weight: 500;
+            line-height: 1.6;
+        }
+
+        [data-theme="light"] .collection-page-header p {
+            color: #374151 !important;
+            font-weight: 500;
         }
         
         .collection-grid-section {
@@ -49,10 +57,10 @@
 </head>
 <body>
     <nav class="navbar">
-        <a href="{{ url_for('index') }}" class="logo" style="text-decoration: none; display: flex; align-items: center;" title="Go to Home">
-            <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="3D Logo" style="height: 42px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 10px rgba(0,0,0,0.4));">
+        <a href="{{ url_for('index') }}" class="logo" title="WearLoop - Luxury Fashion Rental">
+            <img src="{{ url_for('static', filename='assets/logo.png') }}?v=2" alt="WearLoop Logo">
         </a>
-        <ul class="nav-links" style="align-items: center; display: flex; gap: 2.5rem;">
+        <ul class="nav-links">
             <li>
                 <button class="theme-toggle-btn" aria-label="Toggle theme">☀️</button>
             </li>
@@ -113,5 +121,8 @@
     </script>
     <!-- Custom JS for theme toggling -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <!-- Three.js + 3D Background -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="{{ url_for('static', filename='bg3d.js') }}"></script>
 </body>
 </html>

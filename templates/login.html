@@ -2,108 +2,91 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login / Register - Rented Clothes</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        .form-container {
-            max-width: 400px;
-            margin: 150px auto;
-            background: var(--card-bg);
-            padding: 3rem;
-            border-radius: 20px;
-            border: 1px solid var(--card-border);
-            text-align: center;
-        }
-        .form-container h2 {
-            margin-bottom: 2rem;
-            color: var(--accent-color);
-        }
-        .form-group {
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #a0a0a0;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 0.8rem;
-            border-radius: 10px;
-            border: 1px solid var(--card-border);
-            background: rgba(255,255,255,0.05);
-            color: white;
-        }
-        .form-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: space-between;
-            margin-top: 2rem;
-        }
-        .flashes {
-            color: #ff6b6b;
-            list-style: none;
-            margin-bottom: 1rem;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Register - WearLoop</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=6">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
 </head>
 <body>
     <nav class="navbar">
-        <a href="{{ url_for('index') }}" class="logo" style="text-decoration: none; display: flex; align-items: center;" title="Go to Home">
-            <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="3D Logo" style="height: 42px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 10px rgba(0,0,0,0.4));">
+        <a href="{{ url_for('index') }}" class="logo" title="WearLoop - Luxury Fashion Rental">
+            <img src="{{ url_for('static', filename='assets/logo.png') }}?v=2" alt="WearLoop Logo">
         </a>
         <ul class="nav-links">
             <li><a href="{{ url_for('index') }}">Home</a></li>
+            <li><a href="{{ url_for('collection_all') }}">Collection</a></li>
+            <li>
+                <button class="theme-toggle-btn" aria-label="Toggle theme">☀️</button>
+            </li>
         </ul>
     </nav>
 
-    <div class="form-container fade-in visible">
-        <h2 id="form-title">Welcome Back</h2>
-        
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            <ul class="flashes">
-            {% for message in messages %}
-              <li>{{ message }}</li>
-            {% endfor %}
-            </ul>
-          {% endif %}
-        {% endwith %}
+    <div class="auth-wrapper">
+        <div class="form-container fade-in visible">
+            <h2 id="form-title">Welcome Back</h2>
+            <p class="form-subtitle" id="form-subtitle">Sign in to access your luxury rental wardrobe</p>
+            
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <ul class="flashes">
+                {% for message in messages %}
+                  <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+              {% endif %}
+            {% endwith %}
 
-        <form method="POST" id="auth-form">
-            <div class="form-group">
-                <label id="username-label">Username / Email</label>
-                <input type="text" name="username" required placeholder="Enter username or email" style="outline: none; transition: border-color 0.3s;">
-            </div>
-            
-            <div class="form-group" id="email-group" style="display: none;">
-                <label>Email</label>
-                <input type="email" name="email" id="email-input" placeholder="Enter your email address" style="outline: none; transition: border-color 0.3s;">
-            </div>
-            
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" name="password" required placeholder="Enter password" style="outline: none; transition: border-color 0.3s;">
-            </div>
-            
-            <div id="forgot-password-link" style="text-align: right; margin-top: -0.5rem; margin-bottom: 1.5rem;">
-                <a href="{{ url_for('forgot_password') }}" style="color: var(--accent-color); text-decoration: none; font-size: 0.85rem; transition: color 0.3s;">Forgot Password?</a>
-            </div>
-            
-            <div class="form-actions" style="margin-top: 1rem;">
-                <button type="submit" id="primary-btn" name="action" value="login" class="btn btn-primary" style="width: 100%; border-radius: 12px; font-weight: 700; font-size: 1rem;">Login</button>
-            </div>
-            
-            <div style="margin-top: 2rem; text-align: center;">
-                <span id="toggle-text" style="color: #a0a0a0; font-size: 0.9rem;">Don't have an account? </span>
-                <a href="#" id="toggle-mode-link" style="color: var(--accent-color); text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: opacity 0.2s;">Register</a>
-            </div>
-        </form>
+            <form method="POST" id="auth-form">
+                <div class="form-group">
+                    <label id="username-label">Username / Email</label>
+                    <input type="text" name="username" required placeholder="Enter username or email" autocomplete="username">
+                </div>
+                
+                <div class="form-group" id="email-group" style="display: none;">
+                    <label>Email Address</label>
+                    <input type="email" name="email" id="email-input" placeholder="Enter your email address" autocomplete="email">
+                </div>
+                
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" required placeholder="Enter password" autocomplete="current-password">
+                </div>
+                
+                <div id="forgot-password-link" style="text-align: right; margin-top: -0.4rem; margin-bottom: 1.5rem;">
+                    <a href="{{ url_for('forgot_password') }}" class="form-link">Forgot Password?</a>
+                </div>
+                
+                <div class="form-actions" style="margin-top: 1rem;">
+                    <button type="submit" id="primary-btn" name="action" value="login" class="btn btn-primary" style="width: 100%; font-size: 1rem; padding: 0.95rem;">Login</button>
+                </div>
+                
+                <div style="margin-top: 2rem; text-align: center;">
+                    <span id="toggle-text" style="color: var(--text-muted); font-size: 0.9rem;">Don't have an account? </span>
+                    <a href="#" id="toggle-mode-link" class="form-link" style="font-weight: 700;">Register</a>
+                </div>
+            </form>
+        </div>
     </div>
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <!-- 3D Moving Background -->
+    <script src="{{ url_for('static', filename='bg3d.js') }}"></script>
+    <!-- Custom Theme JS -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 
     <script>
         const formTitle = document.getElementById('form-title');
+        const formSubtitle = document.getElementById('form-subtitle');
         const emailGroup = document.getElementById('email-group');
         const emailInput = document.getElementById('email-input');
         const usernameLabel = document.getElementById('username-label');
@@ -118,15 +101,15 @@
             e.preventDefault();
             isLoginMode = !isLoginMode;
             
-            // CSS transition simulation
             const container = document.querySelector('.form-container');
             container.style.opacity = 0;
-            container.style.transform = 'translateY(10px)';
-            container.style.transition = 'all 0.25s ease';
+            container.style.transform = 'translateY(8px)';
+            container.style.transition = 'all 0.22s cubic-bezier(0.16, 1, 0.3, 1)';
             
             setTimeout(() => {
                 if (isLoginMode) {
                     formTitle.textContent = 'Welcome Back';
+                    formSubtitle.textContent = 'Sign in to access your luxury rental wardrobe';
                     emailGroup.style.display = 'none';
                     emailInput.required = false;
                     usernameLabel.textContent = 'Username / Email';
@@ -137,6 +120,7 @@
                     toggleModeLink.textContent = 'Register';
                 } else {
                     formTitle.textContent = 'Create Account';
+                    formSubtitle.textContent = 'Join WearLoop for exclusive designer rentals';
                     emailGroup.style.display = 'block';
                     emailInput.required = true;
                     usernameLabel.textContent = 'Username';
@@ -148,20 +132,7 @@
                 }
                 container.style.opacity = 1;
                 container.style.transform = 'translateY(0)';
-            }, 250);
-        });
-
-        // Add focus effect on fields
-        const inputs = document.querySelectorAll('.form-group input');
-        inputs.forEach(input => {
-            input.addEventListener('focus', () => {
-                input.style.borderColor = 'var(--accent-color)';
-                input.style.boxShadow = '0 0 10px rgba(201, 162, 101, 0.2)';
-            });
-            input.addEventListener('blur', () => {
-                input.style.borderColor = 'var(--card-border)';
-                input.style.boxShadow = 'none';
-            });
+            }, 220);
         });
     </script>
 </body>

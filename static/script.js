@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Observe stagger elements with delay
-    const staggerContainers = document.querySelectorAll('.steps-container, .cards-container, .testimonial-grid');
+    const staggerContainers = document.querySelectorAll('.steps-container, .cards-container, .testimonial-grid, .editorial-grid');
     staggerContainers.forEach(container => {
         const staggerItems = container.querySelectorAll('.stagger-in');
         

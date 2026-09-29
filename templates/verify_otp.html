@@ -2,28 +2,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Verify OTP - Closet Share</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP - WearLoop</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=4">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
     <style>
-        .form-container {
-            max-width: 450px;
-            margin: 150px auto;
-            background: var(--card-bg);
-            padding: 3rem;
-            border-radius: 20px;
-            border: 1px solid var(--card-border);
-            text-align: center;
-            backdrop-filter: blur(15px);
-        }
-        .form-container h2 {
-            margin-bottom: 1rem;
-            color: var(--accent-color);
-        }
-        .form-container p {
-            color: #a0a0a0;
-            font-size: 0.95rem;
-            margin-bottom: 2rem;
-        }
         .otp-inputs {
             display: flex;
             justify-content: space-between;
@@ -38,32 +30,28 @@
             border-radius: 12px;
             border: 1px solid var(--card-border);
             background: rgba(255,255,255,0.05);
-            color: white;
+            color: var(--text-color);
             font-weight: 700;
             outline: none;
             transition: all 0.3s ease;
         }
+        [data-theme="light"] .otp-field {
+            background: rgba(0, 0, 0, 0.03);
+        }
         .otp-field:focus {
-            border-color: var(--accent-color);
-            box-shadow: 0 0 15px var(--accent-glow);
+            border-color: var(--accent-highlight);
+            box-shadow: 0 0 15px rgba(166, 66, 96, 0.25);
             background: rgba(255,255,255,0.08);
         }
-        .flashes {
-            color: #ff6b6b;
-            list-style: none;
-            margin-bottom: 1.5rem;
-            font-size: 0.9rem;
-            padding: 0;
-        }
         .timer {
-            color: #a0a0a0;
+            color: var(--text-muted);
             font-size: 0.9rem;
             margin-top: 1.5rem;
         }
         .resend-btn {
             background: none;
             border: none;
-            color: var(--accent-color);
+            color: var(--headings-accent);
             font-weight: 600;
             cursor: pointer;
             text-decoration: underline;
@@ -71,7 +59,8 @@
             font-size: 0.9rem;
         }
         .resend-btn:disabled {
-            color: #555;
+            color: var(--text-muted);
+            opacity: 0.5;
             cursor: not-allowed;
             text-decoration: none;
         }
@@ -79,15 +68,21 @@
 </head>
 <body>
     <nav class="navbar">
-        <div class="logo">RC.</div>
+        <a href="{{ url_for('index') }}" class="logo" title="WearLoop - Luxury Fashion Rental">
+            <img src="{{ url_for('static', filename='assets/logo.png') }}?v=2" alt="WearLoop Logo">
+        </a>
         <ul class="nav-links">
             <li><a href="{{ url_for('index') }}">Home</a></li>
+            <li>
+                <button class="theme-toggle-btn" aria-label="Toggle theme">☀️</button>
+            </li>
         </ul>
     </nav>
 
-    <div class="form-container fade-in visible">
-        <h2>Enter Verification Code</h2>
-        <p>A 6-digit verification code has been sent to <strong>{{ email }}</strong>. It will expire in 5 minutes.</p>
+    <div class="auth-wrapper">
+        <div class="form-container fade-in visible">
+            <h2>Enter Verification Code</h2>
+            <p class="form-subtitle">A 6-digit verification code has been sent to <strong style="color:var(--text-color);">{{ email }}</strong>. It will expire in 5 minutes.</p>
 
         {% with messages = get_flashed_messages() %}
           {% if messages %}
@@ -123,6 +118,7 @@
             </div>
         </form>
     </div>
+</div>
 
     <script>
         const fields = document.querySelectorAll('.otp-field');
@@ -203,5 +199,11 @@
 
         startTimer();
     </script>
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <!-- 3D Moving Background -->
+    <script src="{{ url_for('static', filename='bg3d.js') }}"></script>
+    <!-- Custom Theme JS -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

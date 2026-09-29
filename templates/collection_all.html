@@ -247,16 +247,29 @@
             position: absolute;
             top: 0;
             left: 0;
-            opacity: 0;
-            transition: opacity 0.6s ease, transform 0.5s ease;
+            opacity: 0 !important;
+            transition: opacity 0.55s ease, transform 0.5s ease;
+            will-change: opacity;
         }
         .dress-gallery img.active {
-            opacity: 1;
+            opacity: 1 !important;
             transform: scale(1);
         }
         .dress-gallery img.prev {
-            opacity: 0;
+            opacity: 0 !important;
             transform: scale(1.03);
+        }
+        /* Override any parent opacity animation for gallery */
+        .dress-card .dress-gallery {
+            opacity: 1 !important;
+        }
+        /* Card appear animation (NOT stagger-in to avoid opacity:0 bug) */
+        .card-appear {
+            animation: cardFadeUp 0.5s ease both;
+        }
+        @keyframes cardFadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
         /* Dots indicator */
         .gallery-dots {
@@ -554,7 +567,7 @@
     <!-- ── Macros ──────────────────────────────────────────────── -->
     {% macro render_card(dress) %}
     {% set gallery = dress.gallery_images | sort(attribute='sort_order') %}
-    <div class="dress-card-link stagger-in visible">
+    <div class="dress-card-link card-appear">
         <div class="dress-card" data-dress-id="{{ dress.id }}">
             <!-- Gallery -->
             <div class="dress-gallery" id="gallery-{{ dress.id }}">
@@ -693,13 +706,7 @@
         });
     }
 
-    // Stagger-in animation
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(e => {
-            if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
-        });
-    }, { threshold: 0.08 });
-    document.querySelectorAll('.stagger-in').forEach(el => observer.observe(el));
+    
     </script>
 </body>
 </html>

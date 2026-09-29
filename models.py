@@ -29,7 +29,26 @@ class Dress(db.Model):
     css_filter = db.Column(db.String(100), nullable=True, default='')
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
 
+    # Cultural category: 'indian', 'western', 'fusion'
+    culture = db.Column(db.String(50), nullable=True, default='western')
+    # Clothing type: 'gown', 'suit', 'saree', 'lehenga', 'sherwani', 'tuxedo', 'blazer', 'kurta', 'cocktail', 'other'
+    clothing_type = db.Column(db.String(50), nullable=True, default='other')
+    # Gender: 'women', 'men', 'unisex'
+    gender = db.Column(db.String(20), nullable=True, default='unisex')
+
     owner = db.relationship('User', backref=db.backref('dresses', lazy=True))
+    # One-to-many: a dress can have multiple gallery images
+    gallery_images = db.relationship('DressImage', backref='dress', lazy=True, cascade='all, delete-orphan')
+
+
+class DressImage(db.Model):
+    """Additional gallery images for a dress (multi-photo support)."""
+    id = db.Column(db.Integer, primary_key=True)
+    dress_id = db.Column(db.Integer, db.ForeignKey('dress.id'), nullable=False)
+    image_file = db.Column(db.String(150), nullable=False)
+    # display order (0 = primary/first shown)
+    sort_order = db.Column(db.Integer, default=0)
+
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)

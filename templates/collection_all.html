@@ -3,15 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Collection - Premium 3D Fashion</title>
-    <meta name="description" content="Explore our entire exclusive collection of high-end designer rentals in interactive 3D.">
+    <title>The Collection — WearLoop Premium Fashion Rentals</title>
+    <meta name="description" content="Browse our curated collection of Indian, Western and Fusion fashion — Sarees, Lehengas, Sherwanis, Gowns, Tuxedos and more.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    
-    <!-- Atropos 3D CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/atropos@2.0.2/atropos.min.css" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=5">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=10">
     <!-- Prevent theme flash -->
     <script>
         (function() {
@@ -20,38 +17,394 @@
         })();
     </script>
     <style>
-        .collection-page-header {
+        /* ── Page Header ─────────────────────────────────── */
+        .coll-hero {
+            padding: 140px 5% 0;
             text-align: center;
-            margin: 140px auto 40px;
-            max-width: 800px;
-            padding: 0 2rem;
+        }
+        .coll-hero .editorial-eyebrow { margin-bottom: 0.5rem; }
+        .coll-hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.4rem, 5vw, 4rem);
+            color: var(--headings-color);
+            margin-bottom: 0.75rem;
+        }
+        .coll-hero h1 span { color: var(--headings-accent); font-style: italic; }
+        .coll-hero p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.7;
         }
 
-        .collection-page-header h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
+        /* ── Filter Bar ───────────────────────────────────── */
+        .filter-wrapper {
+            position: sticky;
+            top: 70px;
+            z-index: 100;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--card-border);
+            padding: 1rem 5%;
+            backdrop-filter: blur(12px);
+        }
+        .filter-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .filter-search {
+            flex: 1;
+            min-width: 180px;
+            max-width: 280px;
+            position: relative;
+        }
+        .filter-search input {
+            width: 100%;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            border-radius: 50px;
+            padding: 0.6rem 1.2rem 0.6rem 2.5rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.25s;
+        }
+        .filter-search input:focus { border-color: var(--headings-accent); }
+        .filter-search .search-icon {
+            position: absolute;
+            left: 0.9rem;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.5;
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+        .filter-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .filter-chip {
+            padding: 0.45rem 1rem;
+            border-radius: 50px;
+            border: 1px solid var(--card-border);
+            background: var(--card-bg);
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .filter-chip:hover {
+            border-color: var(--headings-accent);
+            color: var(--headings-accent);
+        }
+        .filter-chip.active {
+            background: var(--headings-accent);
+            color: #fff;
+            border-color: var(--headings-accent);
+        }
+        .filter-divider {
+            width: 1px;
+            height: 28px;
+            background: var(--card-border);
+            margin: 0 0.25rem;
+            flex-shrink: 0;
+        }
+        .filter-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            font-weight: 600;
+            align-self: center;
+            white-space: nowrap;
+        }
+        .filter-clear {
+            margin-left: auto;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 0.45rem 0.9rem;
+            border-radius: 50px;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+        .filter-clear:hover {
+            border-color: var(--card-border);
+            color: var(--text-primary);
+        }
+
+        /* ── Results Count ──────────────────────────────── */
+        .results-meta {
+            max-width: 1400px;
+            margin: 2rem auto 0.5rem;
+            padding: 0 5%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .results-count {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        .results-count strong { color: var(--text-primary); }
+
+        /* ── Culture Section Headers ─────────────────────── */
+        .culture-section { margin-bottom: 5rem; }
+        .culture-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 0 5%;
+        }
+        .culture-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        .culture-badge.indian {
+            background: linear-gradient(135deg, #FF8C00 0%, #FFD700 100%);
+            color: #1a0a00;
+        }
+        .culture-badge.western {
+            background: linear-gradient(135deg, #4A00E0 0%, #8E2DE2 100%);
+            color: #fff;
+        }
+        .culture-badge.fusion {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: #002a1a;
+        }
+        .culture-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
             color: var(--headings-color);
         }
+        .culture-line {
+            flex: 1;
+            height: 1px;
+            background: var(--card-border);
+        }
 
-        .collection-page-header h1 span {
+        /* ── Card Grid ───────────────────────────────────── */
+        .coll-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 0 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* ── Individual Dress Card ──────────────────────── */
+        .dress-card-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .dress-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.25s;
+            position: relative;
+        }
+        .dress-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+            border-color: var(--headings-accent);
+        }
+
+        /* Gallery (multi-photo) */
+        .dress-gallery {
+            position: relative;
+            height: 340px;
+            overflow: hidden;
+            background: var(--bg-secondary);
+        }
+        .dress-gallery img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 0.6s ease, transform 0.5s ease;
+        }
+        .dress-gallery img.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .dress-gallery img.prev {
+            opacity: 0;
+            transform: scale(1.03);
+        }
+        /* Dots indicator */
+        .gallery-dots {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 5px;
+            z-index: 5;
+        }
+        .gallery-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+        }
+        .gallery-dot.active {
+            background: #fff;
+            transform: scale(1.3);
+        }
+        /* Nav arrows */
+        .gallery-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.45);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .dress-card:hover .gallery-nav { opacity: 1; }
+        .gallery-nav.prev-btn { left: 10px; }
+        .gallery-nav.next-btn { right: 10px; }
+
+        /* Culture tag overlay on card */
+        .card-culture-tag {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 5;
+            padding: 0.25rem 0.7rem;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .card-culture-tag.indian { background: rgba(255,140,0,0.85); color: #fff; }
+        .card-culture-tag.western { background: rgba(74,0,224,0.85); color: #fff; }
+        .card-culture-tag.fusion { background: rgba(17,153,142,0.85); color: #fff; }
+
+        /* Gender tag */
+        .card-gender-tag {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 5;
+            background: rgba(0,0,0,0.55);
+            color: #fff;
+            padding: 0.2rem 0.6rem;
+            border-radius: 50px;
+            font-size: 0.68rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        /* Card body */
+        .dress-info {
+            padding: 1.25rem;
+        }
+        .dress-type-tag {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
             color: var(--headings-accent);
-            font-style: italic;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
         }
-
-        .collection-page-header p {
-            color: var(--text-muted);
+        .dress-name {
+            font-family: 'Playfair Display', serif;
             font-size: 1.15rem;
-            font-weight: 500;
+            color: var(--headings-color);
+            margin-bottom: 0.4rem;
+            line-height: 1.3;
+        }
+        .dress-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
             line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 1rem;
         }
+        .dress-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .dress-price {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--headings-accent);
+        }
+        .dress-cta {
+            padding: 0.45rem 1rem;
+            border-radius: 50px;
+            background: var(--headings-accent);
+            color: #fff;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        .dress-cta:hover { opacity: 0.85; transform: scale(0.98); }
 
-        [data-theme="light"] .collection-page-header p {
-            color: #374151 !important;
-            font-weight: 500;
+        /* ── Empty State ──────────────────────────────────── */
+        .empty-state {
+            text-align: center;
+            padding: 5rem 2rem;
+            color: var(--text-muted);
         }
-        
-        .collection-grid-section {
-            padding: 2rem 5% 8rem;
+        .empty-state .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+        .empty-state h3 { font-size: 1.4rem; color: var(--headings-color); margin-bottom: 0.5rem; }
+        .empty-state p { font-size: 0.95rem; }
+
+        /* ── Responsive ───────────────────────────────────── */
+        @media (max-width: 768px) {
+            .coll-hero { padding-top: 110px; }
+            .filter-form { gap: 0.5rem; }
+            .filter-divider { display: none; }
+            .filter-label { display: none; }
+            .coll-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem; }
         }
     </style>
 </head>
@@ -61,68 +414,292 @@
             <img src="{{ url_for('static', filename='assets/logo.png') }}?v=2" alt="WearLoop Logo">
         </a>
         <ul class="nav-links">
+            <li><a href="{{ url_for('collection_all') }}" class="active">Collection</a></li>
+            <li><a href="{{ url_for('lend_clothes') }}">Lend Clothes</a></li>
+            {% if current_user.is_authenticated %}
+            <li><a href="{{ url_for('dashboard') }}">Profile</a></li>
+            {% if current_user.role == 1 %}
+            <li><a href="{{ url_for('admin_dashboard') }}">Admin</a></li>
+            {% endif %}
+            {% else %}
+            <li><a href="{{ url_for('login') }}">Login</a></li>
+            {% endif %}
             <li>
                 <button class="theme-toggle-btn" aria-label="Toggle theme">☀️</button>
             </li>
         </ul>
     </nav>
 
-    <header class="collection-page-header fade-in visible">
-        <h1>Our Entire <span>Collection</span></h1>
-        <p>Browse through our complete collection of bespoke dresses and luxury tailored suits.</p>
+    <!-- ── Hero ─────────────────────────────────────────────── -->
+    <header class="coll-hero fade-in">
+        <span class="editorial-eyebrow">{{ dresses|length }} Curated Pieces</span>
+        <h1>The <span>Collection</span></h1>
+        <p>Explore our curated wardrobe — from heirloom Indian silhouettes to sleek Western formalwear, and everything in between.</p>
     </header>
 
-    <section class="collection-grid-section">
-        <div class="container">
-            <div class="cards-container">
-                {% for dress in dresses %}
-                <a href="{{ url_for('detail', dress_id=dress.id) }}" class="collection-card-link stagger-in visible" style="text-decoration: none; color: inherit; display: block;">
-                    <div class="atropos my-atropos collection-card">
-                        <div class="atropos-scale">
-                            <div class="atropos-rotate">
-                                <div class="atropos-inner card-inner">
-                                    <div class="card-bg" data-atropos-offset="-5"></div>
-                                    <img src="{{ url_for('static', filename='assets/' ~ dress.image_file) }}" alt="{{ dress.name }}" class="card-image" data-atropos-offset="8" style="{{ dress.css_filter }}">
-                                    <div class="card-content" data-atropos-offset="3">
-                                        <h3>{{ dress.name }}</h3>
-                                        <p>{{ dress.description }}</p>
-                                        <div class="card-footer">
-                                            <span class="price">₹{{ dress.price_per_day }} / day</span>
-                                            <span class="btn btn-small">Rent Now</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+    <!-- ── Sticky Filter Bar ─────────────────────────────────── -->
+    <div class="filter-wrapper">
+        <form class="filter-form" method="GET" action="{{ url_for('collection_all') }}" id="filter-form">
+            <!-- Search -->
+            <div class="filter-search">
+                <span class="search-icon">🔍</span>
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ search_query }}"
+                    placeholder="Search garments…"
+                    aria-label="Search garments"
+                    id="search-input"
+                >
+            </div>
+
+            <div class="filter-divider"></div>
+
+            <!-- Culture Chips -->
+            <span class="filter-label">Culture</span>
+            <div class="filter-chips" role="group" aria-label="Filter by culture">
+                {% for val, label in all_cultures %}
+                <a href="{{ url_for('collection_all', culture=val, type=selected_type, gender=selected_gender, q=search_query) }}"
+                   class="filter-chip {% if selected_culture == val %}active{% endif %}"
+                   aria-pressed="{{ 'true' if selected_culture == val else 'false' }}">
+                    {{ label }}
                 </a>
                 {% endfor %}
             </div>
-        </div>
-    </section>
 
-    <!-- Atropos 3D JS -->
-    <script src="https://unpkg.com/atropos@2.0.2/atropos.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Initialize Atropos.js for Deep 3D Cards
-            document.querySelectorAll('.my-atropos').forEach((el) => {
-                Atropos({
-                    el: el,
-                    activeOffset: 40,
-                    shadowScale: 1.05,
-                    highlight: true,
-                    rotateXMax: 15,
-                    rotateYMax: 15,
-                    stretchZ: 10
-                });
-            });
-        });
-    </script>
-    <!-- Custom JS for theme toggling -->
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+            <div class="filter-divider"></div>
+
+            <!-- Type Chips -->
+            <span class="filter-label">Type</span>
+            <div class="filter-chips" role="group" aria-label="Filter by clothing type">
+                {% for val, label in all_types %}
+                <a href="{{ url_for('collection_all', culture=selected_culture, type=val, gender=selected_gender, q=search_query) }}"
+                   class="filter-chip {% if selected_type == val %}active{% endif %}"
+                   aria-pressed="{{ 'true' if selected_type == val else 'false' }}">
+                    {{ label }}
+                </a>
+                {% endfor %}
+            </div>
+
+            <div class="filter-divider"></div>
+
+            <!-- Gender Chips -->
+            <span class="filter-label">For</span>
+            <div class="filter-chips" role="group" aria-label="Filter by gender">
+                {% for val, label in all_genders %}
+                <a href="{{ url_for('collection_all', culture=selected_culture, type=selected_type, gender=val, q=search_query) }}"
+                   class="filter-chip {% if selected_gender == val %}active{% endif %}"
+                   aria-pressed="{{ 'true' if selected_gender == val else 'false' }}">
+                    {{ label }}
+                </a>
+                {% endfor %}
+            </div>
+
+            {% if selected_culture or selected_type or selected_gender or search_query %}
+            <a href="{{ url_for('collection_all') }}" class="filter-clear">✕ Clear all</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- ── Results Meta ──────────────────────────────────────── -->
+    <div class="results-meta">
+        <p class="results-count">
+            Showing <strong>{{ dresses|length }}</strong> piece{{ 's' if dresses|length != 1 }}
+            {% if selected_culture %} in <strong>{{ selected_culture|capitalize }}</strong>{% endif %}
+            {% if selected_type %} · <strong>{{ selected_type|capitalize }}</strong>{% endif %}
+            {% if search_query %} matching "<strong>{{ search_query }}</strong>"{% endif %}
+        </p>
+    </div>
+
+    <!-- ── Dress Grid ─────────────────────────────────────────── -->
+    <main style="padding-bottom: 8rem;">
+        {% if dresses %}
+            {% if not selected_culture and not selected_type and not selected_gender and not search_query %}
+                {# Grouped by culture when no filters active #}
+                {% set cultures_to_show = [('indian', 'Indian Heritage', '🪔'), ('western', 'Western Elegance', '✨'), ('fusion', 'Fusion Couture', '🌐')] %}
+                {% for culture_val, culture_name, culture_icon in cultures_to_show %}
+                    {% set culture_dresses = dresses | selectattr('culture', 'equalto', culture_val) | list %}
+                    {% if culture_dresses %}
+                    <section class="culture-section" id="section-{{ culture_val }}">
+                        <div class="culture-header fade-in">
+                            <span class="culture-badge {{ culture_val }}">{{ culture_icon }} {{ culture_name }}</span>
+                            <div class="culture-line"></div>
+                            <span style="font-size: 0.85rem; color: var(--text-muted);">{{ culture_dresses|length }} piece{{ 's' if culture_dresses|length != 1 }}</span>
+                        </div>
+                        <div class="coll-grid">
+                            {% for dress in culture_dresses %}
+                            {{ render_card(dress) }}
+                            {% endfor %}
+                        </div>
+                    </section>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                {# Flat grid for filtered results #}
+                <div class="coll-grid" style="margin-top: 1.5rem;">
+                    {% for dress in dresses %}
+                    {{ render_card(dress) }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="empty-state fade-in">
+                <div class="empty-icon">👗</div>
+                <h3>No pieces found</h3>
+                <p>Try adjusting your filters or <a href="{{ url_for('collection_all') }}" style="color: var(--headings-accent);">browse all pieces</a>.</p>
+            </div>
+        {% endif %}
+    </main>
+
+    <!-- ── Macros ──────────────────────────────────────────────── -->
+    {% macro render_card(dress) %}
+    {% set gallery = dress.gallery_images | sort(attribute='sort_order') %}
+    <div class="dress-card-link stagger-in visible">
+        <div class="dress-card" data-dress-id="{{ dress.id }}">
+            <!-- Gallery -->
+            <div class="dress-gallery" id="gallery-{{ dress.id }}">
+                {% if gallery %}
+                    {% for img in gallery %}
+                    <img src="{{ url_for('static', filename='assets/' ~ img.image_file) }}"
+                         alt="{{ dress.name }} — look {{ loop.index }}"
+                         class="{% if loop.first %}active{% endif %}"
+                         loading="{{ 'eager' if loop.first else 'lazy' }}">
+                    {% endfor %}
+                {% else %}
+                    <img src="{{ url_for('static', filename='assets/' ~ dress.image_file) }}"
+                         alt="{{ dress.name }}" class="active">
+                {% endif %}
+
+                <!-- Culture tag -->
+                <span class="card-culture-tag {{ dress.culture or 'western' }}">
+                    {% if dress.culture == 'indian' %}🪔 Indian
+                    {% elif dress.culture == 'fusion' %}🌐 Fusion
+                    {% else %}✨ Western{% endif %}
+                </span>
+
+                <!-- Gender tag -->
+                {% if dress.gender %}
+                <span class="card-gender-tag">
+                    {% if dress.gender == 'women' %}♀ Women
+                    {% elif dress.gender == 'men' %}♂ Men
+                    {% else %}⚭ Unisex{% endif %}
+                </span>
+                {% endif %}
+
+                <!-- Nav arrows (shown on hover via CSS) -->
+                {% if gallery | length > 1 %}
+                <button class="gallery-nav prev-btn" aria-label="Previous photo" onclick="event.preventDefault(); galleryPrev('{{ dress.id }}')">‹</button>
+                <button class="gallery-nav next-btn" aria-label="Next photo" onclick="event.preventDefault(); galleryNext('{{ dress.id }}')">›</button>
+
+                <!-- Dots -->
+                <div class="gallery-dots">
+                    {% for img in gallery %}
+                    <span class="gallery-dot {% if loop.first %}active{% endif %}"
+                          onclick="event.preventDefault(); galleryGo('{{ dress.id }}', {{ loop.index0 }})"></span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Info -->
+            <a href="{{ url_for('detail', dress_id=dress.id) }}" style="text-decoration:none; color: inherit;">
+                <div class="dress-info">
+                    {% if dress.clothing_type %}
+                    <p class="dress-type-tag">{{ dress.clothing_type | capitalize }}</p>
+                    {% endif %}
+                    <h2 class="dress-name">{{ dress.name }}</h2>
+                    <p class="dress-desc">{{ dress.description }}</p>
+                    <div class="dress-footer">
+                        <span class="dress-price">₹{{ "%.0f"|format(dress.price_per_day) }} <small style="font-weight:400; opacity:0.7;">/ day</small></span>
+                        <span class="dress-cta">Rent Now →</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    {% endmacro %}
+
+    <!-- Custom JS for theme + gallery -->
+    <script src="{{ url_for('static', filename='script.js') }}?v=3"></script>
     <!-- Three.js + 3D Background -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
     <script src="{{ url_for('static', filename='bg3d.js') }}"></script>
+
+    <script>
+    // ── Gallery logic ──────────────────────────────────────────
+    const galleryState = {};
+
+    function galleryInit(id, total) {
+        if (!galleryState[id]) galleryState[id] = { idx: 0, total };
+    }
+
+    function galleryGo(id, target) {
+        const el = document.getElementById('gallery-' + id);
+        if (!el) return;
+        const imgs = el.querySelectorAll('img');
+        const dots = el.querySelectorAll('.gallery-dot');
+        galleryInit(id, imgs.length);
+
+        const prev = galleryState[id].idx;
+        galleryState[id].idx = target;
+
+        imgs[prev].classList.remove('active');
+        imgs[target].classList.add('active');
+        if (dots.length) {
+            dots[prev].classList.remove('active');
+            dots[target].classList.add('active');
+        }
+    }
+
+    function galleryNext(id) {
+        const el = document.getElementById('gallery-' + id);
+        if (!el) return;
+        const total = el.querySelectorAll('img').length;
+        galleryInit(id, total);
+        const next = (galleryState[id].idx + 1) % total;
+        galleryGo(id, next);
+    }
+
+    function galleryPrev(id) {
+        const el = document.getElementById('gallery-' + id);
+        if (!el) return;
+        const total = el.querySelectorAll('img').length;
+        galleryInit(id, total);
+        const prev = (galleryState[id].idx - 1 + total) % total;
+        galleryGo(id, prev);
+    }
+
+    // Auto-rotate galleries every 3.5s on hover
+    document.querySelectorAll('.dress-card').forEach(card => {
+        const id = card.dataset.dressId;
+        const total = card.querySelectorAll('.dress-gallery img').length;
+        if (total <= 1) return;
+        let timer;
+        card.addEventListener('mouseenter', () => {
+            timer = setInterval(() => galleryNext(id), 3500);
+        });
+        card.addEventListener('mouseleave', () => clearInterval(timer));
+    });
+
+    // Live search with debounce
+    const searchInput = document.getElementById('search-input');
+    let searchTimer;
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                document.getElementById('filter-form').submit();
+            }, 600);
+        });
+    }
+
+    // Stagger-in animation
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+            if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+        });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.stagger-in').forEach(el => observer.observe(el));
+    </script>
 </body>
 </html>

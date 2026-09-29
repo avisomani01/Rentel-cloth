@@ -11,7 +11,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from dotenv import load_dotenv
 from flask_cors import CORS
-from models import db, User, Dress, Order
+from models import db, User, Dress, DressImage, Order
 
 # Load environment variables from .env file
 load_dotenv()
@@ -273,15 +273,203 @@ def generate_virtual_3d_image(filename, category):
         print(f"AI 3D Image generation failed: {e}")
         return filename
 
+# ── Expanded catalog with Indian + Western cultural categories ───────────────
+INDIAN_WESTERN_CATALOG = [
+    # ── INDIAN CULTURE ────────────────────────────────────────────────────────
+    {
+        'name': 'Royal Indigo Sherwani',
+        'description': 'Regal pure-silk sherwani with intricate gold zardozi embroidery — perfect for weddings and sangeet ceremonies.',
+        'price_per_day': 6000.0,
+        'image_file': 'royal_indigo_sherwani.jpg',
+        'culture': 'indian',
+        'clothing_type': 'sherwani',
+        'gender': 'men',
+        'gallery': ['royal_indigo_sherwani.jpg'],
+    },
+    {
+        'name': 'Golden Shimmer Saree',
+        'description': 'Opulent Banarasi silk saree with heavy zari border and cascading gold pallav. An heirloom-quality bridal statement.',
+        'price_per_day': 4800.0,
+        'image_file': 'golden_shimmer_sari.jpg',
+        'culture': 'indian',
+        'clothing_type': 'saree',
+        'gender': 'women',
+        'gallery': ['golden_shimmer_sari.jpg'],
+    },
+    {
+        'name': 'Crimson Bridal Lehenga',
+        'description': 'Hand-crafted red lehenga choli adorned with mirror-work and resham embroidery — the quintessential bridal silhouette.',
+        'price_per_day': 7500.0,
+        'image_file': 'ruby_crimson_blazer.jpg',
+        'culture': 'indian',
+        'clothing_type': 'lehenga',
+        'gender': 'women',
+        'gallery': ['ruby_crimson_blazer.jpg'],
+    },
+    {
+        'name': 'Pearl White Anarkali',
+        'description': 'Flowing floor-length Anarkali suit in chiffon with pearl and sequin detailing — ethereal for Eid or festive occasions.',
+        'price_per_day': 3800.0,
+        'image_file': 'champagne_silk_gown.jpg',
+        'culture': 'indian',
+        'clothing_type': 'kurta',
+        'gender': 'women',
+        'gallery': ['champagne_silk_gown.jpg'],
+    },
+    {
+        'name': 'Emerald Bandhgala Suit',
+        'description': 'Sharp tailored bandhgala in rich emerald brocade with contrast piping — a modern take on Indian formal menswear.',
+        'price_per_day': 4200.0,
+        'image_file': 'emerald_silk_slip.jpg',
+        'culture': 'indian',
+        'clothing_type': 'suit',
+        'gender': 'men',
+        'gallery': ['emerald_silk_slip.jpg'],
+    },
+    {
+        'name': 'Champagne Silk Saree',
+        'description': 'Fluid champagne-hued crepe saree with delicate golden embroidery along the border — ideal for cocktail parties and receptions.',
+        'price_per_day': 3500.0,
+        'image_file': 'champagne_silk_gown.jpg',
+        'culture': 'indian',
+        'clothing_type': 'saree',
+        'gender': 'women',
+        'gallery': ['champagne_silk_gown.jpg'],
+    },
+    # ── WESTERN CULTURE ───────────────────────────────────────────────────────
+    {
+        'name': 'Midnight Gala Gown',
+        'description': 'Sculptural midnight-black floor-length gown with structured bodice and cascading skirt — made for red carpet entrances.',
+        'price_per_day': 4500.0,
+        'image_file': 'midnight_gala_gown.jpg',
+        'culture': 'western',
+        'clothing_type': 'gown',
+        'gender': 'women',
+        'gallery': ['midnight_gala_gown.jpg'],
+    },
+    {
+        'name': 'Classic Tailored Suit',
+        'description': 'Italian-cut charcoal wool suit — the definitive power suit for board meetings, galas, and landmark occasions.',
+        'price_per_day': 3200.0,
+        'image_file': 'classic_tailored_suit.jpg',
+        'culture': 'western',
+        'clothing_type': 'suit',
+        'gender': 'men',
+        'gallery': ['classic_tailored_suit.jpg'],
+    },
+    {
+        'name': 'Emerald Silk Slip',
+        'description': 'Bias-cut emerald slip dress in pure silk charmeuse — understated, sensual, and effortlessly luxurious.',
+        'price_per_day': 2800.0,
+        'image_file': 'emerald_silk_slip.jpg',
+        'culture': 'western',
+        'clothing_type': 'cocktail',
+        'gender': 'women',
+        'gallery': ['emerald_silk_slip.jpg'],
+    },
+    {
+        'name': 'Velvet Black Tuxedo',
+        'description': 'Deep-black velvet tuxedo with satin lapels and slim-cut trousers — the gold standard for black-tie events.',
+        'price_per_day': 5500.0,
+        'image_file': 'velvet_tuxedo.jpg',
+        'culture': 'western',
+        'clothing_type': 'tuxedo',
+        'gender': 'men',
+        'gallery': ['velvet_tuxedo.jpg'],
+    },
+    {
+        'name': 'Sapphire Evening Gown',
+        'description': 'Strapless sapphire-blue duchess satin gown with a sweeping train — breathtaking for galas and awards ceremonies.',
+        'price_per_day': 4200.0,
+        'image_file': 'sapphire_evening_dress.jpg',
+        'culture': 'western',
+        'clothing_type': 'gown',
+        'gender': 'women',
+        'gallery': ['sapphire_evening_dress.jpg'],
+    },
+    {
+        'name': 'Rose Gold Prom Dress',
+        'description': 'Dreamy A-line prom dress in rose gold mikado fabric with hand-stitched floral appliqué — romantic and luminous.',
+        'price_per_day': 3900.0,
+        'image_file': 'rose_gold_prom_dress.jpg',
+        'culture': 'western',
+        'clothing_type': 'gown',
+        'gender': 'women',
+        'gallery': ['rose_gold_prom_dress.jpg'],
+    },
+    {
+        'name': 'Ivory Wedding Tuxedo',
+        'description': 'Pristine ivory tuxedo with grosgrain lapels and matching trousers — crafted for grooms and best men.',
+        'price_per_day': 5800.0,
+        'image_file': 'ivory_wedding_tux.jpg',
+        'culture': 'western',
+        'clothing_type': 'tuxedo',
+        'gender': 'men',
+        'gallery': ['ivory_wedding_tux.jpg'],
+    },
+    {
+        'name': 'Ruby Power Blazer',
+        'description': 'Striking scarlet double-breasted blazer in structured crepe — bold, authoritative, and undeniably chic for formal events.',
+        'price_per_day': 3500.0,
+        'image_file': 'ruby_crimson_blazer.jpg',
+        'culture': 'western',
+        'clothing_type': 'blazer',
+        'gender': 'women',
+        'gallery': ['ruby_crimson_blazer.jpg'],
+    },
+    {
+        'name': 'Charcoal Executive Suit',
+        'description': 'Deep charcoal fine-wool blend suit with peak lapels — distinguished elegance for high-stakes professional engagements.',
+        'price_per_day': 3400.0,
+        'image_file': 'charcoal_executive_suit.jpg',
+        'culture': 'western',
+        'clothing_type': 'suit',
+        'gender': 'men',
+        'gallery': ['charcoal_executive_suit.jpg'],
+    },
+    {
+        'name': 'Champagne Silk Evening Gown',
+        'description': 'Liquid-gold champagne silk gown with cowl neckline and soft draping — a timeless choice for soirées and galas.',
+        'price_per_day': 5000.0,
+        'image_file': 'champagne_silk_gown.jpg',
+        'culture': 'western',
+        'clothing_type': 'gown',
+        'gender': 'women',
+        'gallery': ['champagne_silk_gown.jpg'],
+    },
+    # ── FUSION ────────────────────────────────────────────────────────────────
+    {
+        'name': 'Indo-Western Floral Kurta',
+        'description': 'Contemporary kurta-jacket set blending Mughal floral prints with a sharp Western-cut collar — the perfect fusion statement.',
+        'price_per_day': 2600.0,
+        'image_file': 'royal_indigo_sherwani.jpg',
+        'culture': 'fusion',
+        'clothing_type': 'kurta',
+        'gender': 'men',
+        'gallery': ['royal_indigo_sherwani.jpg'],
+    },
+    {
+        'name': 'Contemporary Draped Gown',
+        'description': 'A dramatic modern gown with saree-inspired draping over a fitted silk corset — East meets West in haute couture.',
+        'price_per_day': 5200.0,
+        'image_file': 'emerald_silk_slip.jpg',
+        'culture': 'fusion',
+        'clothing_type': 'gown',
+        'gender': 'women',
+        'gallery': ['emerald_silk_slip.jpg'],
+    },
+]
+
 with app.app_context():
     # Dynamic DB Migration Helper for SQLite
     if db.engine.name == 'sqlite':
         try:
             from sqlalchemy import text
             conn = db.engine.connect()
+
+            # User table migrations
             result = conn.execute(text("PRAGMA table_info(user)")).fetchall()
             existing_cols = [row[1] for row in result]
-            
             if existing_cols:
                 if 'email' not in existing_cols:
                     conn.execute(text("ALTER TABLE user ADD COLUMN email VARCHAR(150)"))
@@ -295,46 +483,44 @@ with app.app_context():
                     conn.execute(text("ALTER TABLE user ADD COLUMN otp_attempts INTEGER DEFAULT 0"))
                 if 'otp_last_sent' not in existing_cols:
                     conn.execute(text("ALTER TABLE user ADD COLUMN otp_last_sent DATETIME"))
-                conn.commit()
+
+            # Dress table migrations — new cultural columns
+            result_dress = conn.execute(text("PRAGMA table_info(dress)")).fetchall()
+            existing_dress_cols = [row[1] for row in result_dress]
+            if existing_dress_cols:
+                if 'culture' not in existing_dress_cols:
+                    conn.execute(text("ALTER TABLE dress ADD COLUMN culture VARCHAR(50) DEFAULT 'western'"))
+                if 'clothing_type' not in existing_dress_cols:
+                    conn.execute(text("ALTER TABLE dress ADD COLUMN clothing_type VARCHAR(50) DEFAULT 'other'"))
+                if 'gender' not in existing_dress_cols:
+                    conn.execute(text("ALTER TABLE dress ADD COLUMN gender VARCHAR(20) DEFAULT 'unisex'"))
+
+            conn.commit()
             conn.close()
         except Exception as e:
             print(f"Migration warning: {e}")
 
     db.create_all()
-    
-    GARMENT_REAL_PHOTOS = {
-        'Midnight Gala Gown': 'midnight_gala_gown.jpg',
-        'Classic Tailored Suit': 'classic_tailored_suit.jpg',
-        'Emerald Silk Slip': 'emerald_silk_slip.jpg',
-        'Velvet Tuxedo': 'velvet_tuxedo.jpg',
-        'Royal Indigo Sherwani': 'royal_indigo_sherwani.jpg',
-        'Golden Shimmer Sari': 'golden_shimmer_sari.jpg',
-        'Ruby Crimson Blazer': 'ruby_crimson_blazer.jpg',
-        'Sapphire Evening Dress': 'sapphire_evening_dress.jpg',
-        'Ivory Wedding Tux': 'ivory_wedding_tux.jpg',
-        'Rose Gold Prom Dress': 'rose_gold_prom_dress.jpg',
-        'Champagne Silk Gown': 'champagne_silk_gown.jpg',
-        'Charcoal Executive Suit': 'charcoal_executive_suit.jpg'
-    }
 
-    # Seed the database with initial dresses if empty
+    # Seed the database with expanded catalog if empty
     if not Dress.query.first():
-        dresses = [
-            Dress(name='Midnight Gala Gown', description='A stunning elegant evening gown.', price_per_day=4500.0, image_file=GARMENT_REAL_PHOTOS['Midnight Gala Gown'], css_filter=''),
-            Dress(name='Classic Tailored Suit', description='A sharp suit for executive meetings.', price_per_day=3200.0, image_file=GARMENT_REAL_PHOTOS['Classic Tailored Suit'], css_filter=''),
-            Dress(name='Emerald Silk Slip', description='Minimalist luxury for any occasion.', price_per_day=2800.0, image_file=GARMENT_REAL_PHOTOS['Emerald Silk Slip'], css_filter=''),
-            Dress(name='Velvet Tuxedo', description='Stand out with a deep black velvet tux.', price_per_day=5500.0, image_file=GARMENT_REAL_PHOTOS['Velvet Tuxedo'], css_filter=''),
-            Dress(name='Royal Indigo Sherwani', description='Traditional luxury suit crafted from pure silk.', price_per_day=6000.0, image_file=GARMENT_REAL_PHOTOS['Royal Indigo Sherwani'], css_filter=''),
-            Dress(name='Golden Shimmer Sari', description='A heavily embroidered designer sari with gold accents.', price_per_day=4800.0, image_file=GARMENT_REAL_PHOTOS['Golden Shimmer Sari'], css_filter=''),
-            Dress(name='Ruby Crimson Blazer', description='A striking scarlet blazer for formal events.', price_per_day=3500.0, image_file=GARMENT_REAL_PHOTOS['Ruby Crimson Blazer'], css_filter=''),
-            Dress(name='Sapphire Evening Dress', description='A deep blue gown that catches the light beautifully.', price_per_day=4200.0, image_file=GARMENT_REAL_PHOTOS['Sapphire Evening Dress'], css_filter=''),
-            Dress(name='Ivory Wedding Tux', description='Pristine white tuxedo set for wedding celebrations.', price_per_day=5800.0, image_file=GARMENT_REAL_PHOTOS['Ivory Wedding Tux'], css_filter=''),
-            Dress(name='Rose Gold Prom Dress', description='Elegant flowing silhouette in soft rose gold colors.', price_per_day=3900.0, image_file=GARMENT_REAL_PHOTOS['Rose Gold Prom Dress'], css_filter=''),
-            Dress(name='Champagne Silk Gown', description='Liquid gold styling with soft drape detailing.', price_per_day=5000.0, image_file=GARMENT_REAL_PHOTOS['Champagne Silk Gown'], css_filter=''),
-            Dress(name='Charcoal Executive Suit', description='Deep gray tailored wool blend formal wear.', price_per_day=3400.0, image_file=GARMENT_REAL_PHOTOS['Charcoal Executive Suit'], css_filter='')
-        ]
-        db.session.bulk_save_objects(dresses)
-        
+        for item in INDIAN_WESTERN_CATALOG:
+            d = Dress(
+                name=item['name'],
+                description=item['description'],
+                price_per_day=item['price_per_day'],
+                image_file=item['image_file'],
+                css_filter='',
+                culture=item.get('culture', 'western'),
+                clothing_type=item.get('clothing_type', 'other'),
+                gender=item.get('gender', 'unisex'),
+            )
+            db.session.add(d)
+            db.session.flush()  # get d.id
+            # Add gallery images
+            for idx, img in enumerate(item.get('gallery', [item['image_file']])):
+                db.session.add(DressImage(dress_id=d.id, image_file=img, sort_order=idx))
+
         # Create an admin user for testing
         hashed_password = generate_password_hash('admin', method='pbkdf2:sha256')
         admin = User(username='admin', email='admin@clothesrent.com', password=hashed_password, role=1, is_verified=True)
@@ -349,24 +535,76 @@ with app.app_context():
             admin.is_verified = True
             db.session.commit()
 
-    # Dynamic startup migration to update all garments to real, authentic photography
-    try:
-        existing_dresses = Dress.query.all()
-        for d in existing_dresses:
-            if d.name in GARMENT_REAL_PHOTOS:
-                d.image_file = GARMENT_REAL_PHOTOS[d.name]
-                d.css_filter = ''
-            elif d.image_file and d.image_file.startswith('virtual_3d_'):
-                d.image_file = d.image_file.replace('virtual_3d_', '')
-        db.session.commit()
-    except Exception as d_err:
-        print(f"Startup real photo migration failed: {d_err}")
+        # Backfill cultural metadata for existing dresses from catalog definition
+        try:
+            catalog_by_name = {item['name']: item for item in INDIAN_WESTERN_CATALOG}
+            existing_dresses = Dress.query.all()
+            for d in existing_dresses:
+                meta = catalog_by_name.get(d.name)
+                if meta:
+                    d.image_file = meta['image_file']
+                    d.css_filter = ''
+                    d.culture = meta.get('culture', d.culture or 'western')
+                    d.clothing_type = meta.get('clothing_type', d.clothing_type or 'other')
+                    d.gender = meta.get('gender', d.gender or 'unisex')
+                    # Backfill gallery images if missing
+                    if not d.gallery_images:
+                        for idx, img in enumerate(meta.get('gallery', [meta['image_file']])):
+                            db.session.add(DressImage(dress_id=d.id, image_file=img, sort_order=idx))
+                elif d.image_file and d.image_file.startswith('virtual_3d_'):
+                    d.image_file = d.image_file.replace('virtual_3d_', '')
+            db.session.commit()
+        except Exception as d_err:
+            print(f"Startup catalog migration failed: {d_err}")
 
 @app.route('/')
 def index():
     dresses = Dress.query.order_by(Dress.id.desc()).limit(6).all()
     has_more = Dress.query.count() > 6
     return render_template('index.html', dresses=dresses, has_more=has_more)
+
+
+@app.route('/collection')
+def collection_all():
+    """Collection page with optional filters: culture, type, gender, search."""
+    culture = request.args.get('culture', '')       # indian | western | fusion
+    clothing_type = request.args.get('type', '')    # gown | suit | saree | etc.
+    gender = request.args.get('gender', '')          # women | men | unisex
+    search = request.args.get('q', '').strip()
+
+    query = Dress.query
+    if culture:
+        query = query.filter(Dress.culture == culture)
+    if clothing_type:
+        query = query.filter(Dress.clothing_type == clothing_type)
+    if gender:
+        query = query.filter(Dress.gender == gender)
+    if search:
+        query = query.filter(Dress.name.ilike(f'%{search}%'))
+
+    dresses = query.order_by(Dress.id.asc()).all()
+
+    # Build filter options for the UI
+    all_cultures = [('', 'All Cultures'), ('indian', 'Indian'), ('western', 'Western'), ('fusion', 'Fusion')]
+    all_types = [
+        ('', 'All Types'),
+        ('gown', 'Gown'), ('saree', 'Saree'), ('lehenga', 'Lehenga'),
+        ('sherwani', 'Sherwani'), ('kurta', 'Kurta'),
+        ('tuxedo', 'Tuxedo'), ('suit', 'Suit'), ('blazer', 'Blazer'), ('cocktail', 'Cocktail'),
+    ]
+    all_genders = [('', 'All'), ('women', 'Women'), ('men', 'Men'), ('unisex', 'Unisex')]
+
+    return render_template(
+        'collection_all.html',
+        dresses=dresses,
+        all_cultures=all_cultures,
+        all_types=all_types,
+        all_genders=all_genders,
+        selected_culture=culture,
+        selected_type=clothing_type,
+        selected_gender=gender,
+        search_query=search,
+    )
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -705,10 +943,7 @@ def dress_showcase(dress_id):
 def faq():
     return render_template('faq.html')
 
-@app.route('/collection')
-def collection_all():
-    dresses = Dress.query.order_by(Dress.id.desc()).all()
-    return render_template('collection_all.html', dresses=dresses)
+
 
 @app.route('/dashboard')
 @login_required

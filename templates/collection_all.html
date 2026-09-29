@@ -446,6 +446,74 @@
     </style>
 </head>
 <body>
+    <!-- ── Macros ──────────────────────────────────────────────── -->
+    {% macro render_card(dress) %}
+    {% set gallery = dress.gallery_images | sort(attribute='sort_order') %}
+    <div class="dress-card-link card-appear">
+        <div class="dress-card" data-dress-id="{{ dress.id }}">
+            <!-- Gallery -->
+            <div class="dress-gallery" id="gallery-{{ dress.id }}">
+                {% if gallery %}
+                    {% for img in gallery %}
+                    <img src="{{ url_for('static', filename='assets/' ~ img.image_file) }}"
+                         alt="{{ dress.name }} — look {{ loop.index }}"
+                         class="{% if loop.first %}active{% endif %}"
+                         loading="{{ 'eager' if loop.first else 'lazy' }}">
+                    {% endfor %}
+                {% else %}
+                    <img src="{{ url_for('static', filename='assets/' ~ dress.image_file) }}"
+                         alt="{{ dress.name }}" class="active">
+                {% endif %}
+
+                <!-- Culture tag -->
+                <span class="card-culture-tag {{ dress.culture or 'western' }}">
+                    {% if dress.culture == 'indian' %}🪔 Indian
+                    {% elif dress.culture == 'fusion' %}🌐 Fusion
+                    {% else %}✨ Western{% endif %}
+                </span>
+
+                <!-- Gender tag -->
+                {% if dress.gender %}
+                <span class="card-gender-tag">
+                    {% if dress.gender == 'women' %}♀ Women
+                    {% elif dress.gender == 'men' %}♂ Men
+                    {% else %}⚭ Unisex{% endif %}
+                </span>
+                {% endif %}
+
+                <!-- Nav arrows (shown on hover via CSS) -->
+                {% if gallery | length > 1 %}
+                <button class="gallery-nav prev-btn" aria-label="Previous photo" onclick="event.preventDefault(); galleryPrev('{{ dress.id }}')">‹</button>
+                <button class="gallery-nav next-btn" aria-label="Next photo" onclick="event.preventDefault(); galleryNext('{{ dress.id }}')">›</button>
+
+                <!-- Dots -->
+                <div class="gallery-dots">
+                    {% for img in gallery %}
+                    <span class="gallery-dot {% if loop.first %}active{% endif %}"
+                          onclick="event.preventDefault(); galleryGo('{{ dress.id }}', {{ loop.index0 }})"></span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Info -->
+            <a href="{{ url_for('detail', dress_id=dress.id) }}" style="text-decoration:none; color: inherit;">
+                <div class="dress-info">
+                    {% if dress.clothing_type %}
+                    <p class="dress-type-tag">{{ dress.clothing_type | capitalize }}</p>
+                    {% endif %}
+                    <h2 class="dress-name">{{ dress.name }}</h2>
+                    <p class="dress-desc">{{ dress.description }}</p>
+                    <div class="dress-footer">
+                        <span class="dress-price">₹{{ "%.0f"|format(dress.price_per_day) }} <small style="font-weight:400; opacity:0.7;">/ day</small></span>
+                        <span class="dress-cta">Rent Now →</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    {% endmacro %}
+
     <nav class="navbar">
         <a href="{{ url_for('index') }}" class="logo" title="WearLoop - Luxury Fashion Rental">
             <img src="{{ url_for('static', filename='assets/logo.png') }}?v=2" alt="WearLoop Logo">
@@ -588,74 +656,6 @@
             </div>
         {% endif %}
     </main>
-
-    <!-- ── Macros ──────────────────────────────────────────────── -->
-    {% macro render_card(dress) %}
-    {% set gallery = dress.gallery_images | sort(attribute='sort_order') %}
-    <div class="dress-card-link card-appear">
-        <div class="dress-card" data-dress-id="{{ dress.id }}">
-            <!-- Gallery -->
-            <div class="dress-gallery" id="gallery-{{ dress.id }}">
-                {% if gallery %}
-                    {% for img in gallery %}
-                    <img src="{{ url_for('static', filename='assets/' ~ img.image_file) }}"
-                         alt="{{ dress.name }} — look {{ loop.index }}"
-                         class="{% if loop.first %}active{% endif %}"
-                         loading="{{ 'eager' if loop.first else 'lazy' }}">
-                    {% endfor %}
-                {% else %}
-                    <img src="{{ url_for('static', filename='assets/' ~ dress.image_file) }}"
-                         alt="{{ dress.name }}" class="active">
-                {% endif %}
-
-                <!-- Culture tag -->
-                <span class="card-culture-tag {{ dress.culture or 'western' }}">
-                    {% if dress.culture == 'indian' %}🪔 Indian
-                    {% elif dress.culture == 'fusion' %}🌐 Fusion
-                    {% else %}✨ Western{% endif %}
-                </span>
-
-                <!-- Gender tag -->
-                {% if dress.gender %}
-                <span class="card-gender-tag">
-                    {% if dress.gender == 'women' %}♀ Women
-                    {% elif dress.gender == 'men' %}♂ Men
-                    {% else %}⚭ Unisex{% endif %}
-                </span>
-                {% endif %}
-
-                <!-- Nav arrows (shown on hover via CSS) -->
-                {% if gallery | length > 1 %}
-                <button class="gallery-nav prev-btn" aria-label="Previous photo" onclick="event.preventDefault(); galleryPrev('{{ dress.id }}')">‹</button>
-                <button class="gallery-nav next-btn" aria-label="Next photo" onclick="event.preventDefault(); galleryNext('{{ dress.id }}')">›</button>
-
-                <!-- Dots -->
-                <div class="gallery-dots">
-                    {% for img in gallery %}
-                    <span class="gallery-dot {% if loop.first %}active{% endif %}"
-                          onclick="event.preventDefault(); galleryGo('{{ dress.id }}', {{ loop.index0 }})"></span>
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </div>
-
-            <!-- Info -->
-            <a href="{{ url_for('detail', dress_id=dress.id) }}" style="text-decoration:none; color: inherit;">
-                <div class="dress-info">
-                    {% if dress.clothing_type %}
-                    <p class="dress-type-tag">{{ dress.clothing_type | capitalize }}</p>
-                    {% endif %}
-                    <h2 class="dress-name">{{ dress.name }}</h2>
-                    <p class="dress-desc">{{ dress.description }}</p>
-                    <div class="dress-footer">
-                        <span class="dress-price">₹{{ "%.0f"|format(dress.price_per_day) }} <small style="font-weight:400; opacity:0.7;">/ day</small></span>
-                        <span class="dress-cta">Rent Now →</span>
-                    </div>
-                </div>
-            </a>
-        </div>
-    </div>
-    {% endmacro %}
 
     <!-- Custom JS for theme + gallery -->
     <script src="{{ url_for('static', filename='script.js') }}?v=3"></script>

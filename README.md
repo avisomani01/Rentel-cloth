@@ -1,4 +1,4 @@
-# 👗 Closet Share — Peer-to-Peer Wardrobe Rental Marketplace
+# 👗 Wear loop — Peer-to-Peer Wardrobe Rental Marketplace
 
 [![Python Version](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
 [![Flask Version](https://img.shields.io/badge/Flask-3.0.3-green?logo=flask&logoColor=white)](https://flask.palletsprojects.com/)

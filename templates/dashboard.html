@@ -324,16 +324,13 @@
 </head>
 <body>
     <nav class="navbar">
-        <a href="{{ url_for('index') }}" class="logo" style="text-decoration: none; color: var(--text-color);">
-            <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;">
-                <path d="M16 9C18 9 19 7.5 19 6.5C19 5.5 17.5 4 16 4C14.5 4 13 5.5 13 6.5" stroke="var(--accent-color)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M5 14L16 24L27 14" stroke="var(--accent-color)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M10 14L16 20L22 14" stroke="var(--accent-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <span>VogueVault</span>
+        <a href="{{ url_for('index') }}" class="logo" title="WearLoop - Luxury Fashion Rental">
+            <img src="{{ url_for('static', filename='assets/logo.png') }}?v=2" alt="WearLoop Logo">
         </a>
-        <ul class="nav-links" style="align-items: center; display: flex; gap: 2.5rem;">
+        <ul class="nav-links">
+            <li><a href="{{ url_for('collection_all') }}">Collection</a></li>
             <li><a href="{{ url_for('lend_clothes') }}">Lend Clothes</a></li>
+            <li><a href="{{ url_for('dashboard') }}" class="active">Profile</a></li>
             {% if current_user.role == 1 %}
             <li><a href="{{ url_for('admin_dashboard') }}">Admin</a></li>
             {% endif %}
@@ -346,9 +343,23 @@
 
     <div class="dashboard-wrapper fade-in visible">
         <div class="dashboard-header">
-            <div class="user-greet">
-                <p style="color: #a0a0a0; text-transform: uppercase; letter-spacing: 1.5px; font-size: 0.85rem; margin-bottom: 0.25rem;">Member Profile</p>
-                <h1>Welcome back, <span>{{ current_user.username }}</span></h1>
+            <div class="user-greet" style="display: flex; align-items: center; gap: 1.5rem;">
+                <!-- Profile Avatar -->
+                <div style="
+                    width: 68px; height: 68px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, var(--accent-color), var(--headings-accent));
+                    display: flex; align-items: center; justify-content: center;
+                    font-size: 1.8rem; font-weight: 800; color: #fff;
+                    flex-shrink: 0;
+                    box-shadow: 0 4px 20px rgba(139,30,63,0.35);
+                    border: 2px solid rgba(255,255,255,0.15);
+                    font-family: var(--font-serif);
+                ">{{ current_user.username[0] | upper }}</div>
+                <div>
+                    <p style="color: #a0a0a0; text-transform: uppercase; letter-spacing: 1.5px; font-size: 0.85rem; margin-bottom: 0.25rem;">Member Profile</p>
+                    <h1>Welcome back, <span>{{ current_user.username }}</span></h1>
+                </div>
             </div>
             {% if current_user.role == 1 %}
             <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary">Go to Admin Panel</a>

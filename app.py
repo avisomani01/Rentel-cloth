@@ -1,6 +1,10 @@
 import os
 import re
 import secrets
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.header import Header
 import hmac
 import json
 import urllib.request
@@ -50,10 +54,19 @@ def smart_url_for(endpoint, **values):
 def inject_smart_url_for():
     return dict(url_for=smart_url_for)
 
-# Brevo API Configuration
+# Email Delivery Configuration (Supports Resend API, Brevo API, and Gmail SMTP)
+app.config['RESEND_API_KEY'] = os.environ.get('RESEND_API_KEY')
+app.config['RESEND_SENDER'] = os.environ.get('RESEND_SENDER', 'onboarding@resend.dev')
+
 app.config['BREVO_API_KEY'] = os.environ.get('BREVO_API_KEY')
 app.config['BREVO_SENDER_EMAIL'] = os.environ.get('BREVO_SENDER_EMAIL', 'no-reply@closetshare.com')
 app.config['BREVO_SENDER_NAME'] = os.environ.get('BREVO_SENDER_NAME', 'Closet Share')
+
+app.config['SMTP_SERVER'] = os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
+app.config['SMTP_PORT'] = int(os.environ.get('SMTP_PORT', 587))
+app.config['SMTP_USERNAME'] = os.environ.get('SMTP_USERNAME')
+app.config['SMTP_PASSWORD'] = os.environ.get('SMTP_PASSWORD')
+app.config['SMTP_SENDER'] = os.environ.get('SMTP_SENDER')
 
 def generate_otp():
     # Cryptographically secure random 6 digit OTP
@@ -61,15 +74,9 @@ def generate_otp():
     return "".join(digits)
 
 def send_otp_email(to_email, otp, purpose="register"):
-    brevo_api_key = os.environ.get('BREVO_API_KEY') or app.config.get('BREVO_API_KEY')
-    brevo_sender_email = os.environ.get('BREVO_SENDER_EMAIL') or app.config.get('BREVO_SENDER_EMAIL') or 'no-reply@closetshare.com'
-    brevo_sender_name = os.environ.get('BREVO_SENDER_NAME') or app.config.get('BREVO_SENDER_NAME') or 'Closet Share'
+    subject_purpose = "Password Reset" if purpose == "reset" else "Account Verification"
+    subject = f"Your OTP Code for Closet Share - {subject_purpose}"
     
-    if purpose == "reset":
-        subject = "OTP Code for Closet Share - Reset"
-    else:
-        subject = "OTP Code for Closet Share - Register"
-        
     body = f"""Hello,
 
 Your verification code (OTP) for Closet Share is:
@@ -84,64 +91,144 @@ If you did not request this code, you can safely ignore this email.
 Warm regards,
 Closet Share Team
 """
-    
-    url = "https://api.brevo.com/v3/smtp/email"
-    headers = {
-        "api-key": brevo_api_key or "",
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-    }
-    
-    data = {
-        "sender": {
-            "name": brevo_sender_name,
-            "email": brevo_sender_email
-        },
-        "to": [
-            {
-                "email": to_email
-            }
-        ],
-        "subject": subject,
-        "textContent": body
-    }
-    
-    try:
-        if not brevo_api_key:
-            raise ValueError("BREVO_API_KEY environment variable is not set.")
-            
-        req = urllib.request.Request(
-            url,
-            data=json.dumps(data).encode('utf-8'),
-            headers=headers,
-            method='POST'
-        )
-        
-        with urllib.request.urlopen(req, timeout=10) as response:
-            return True
-            
-    except urllib.error.HTTPError as e:
-        status_code = e.code
+
+    html_body = f"""
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 28px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; color: #1e293b;">
+      <h2 style="color: #6366f1; margin-top: 0; font-size: 22px; font-weight: 700;">Closet Share</h2>
+      <p style="font-size: 15px; color: #334155; line-height: 1.5;">Hello,</p>
+      <p style="font-size: 15px; color: #334155; line-height: 1.5;">Your verification code (OTP) for Closet Share is:</p>
+      <div style="text-align: center; margin: 28px 0;">
+        <span style="display: inline-block; font-size: 32px; font-weight: 800; letter-spacing: 6px; color: #1e1b4b; background: #eef2ff; border: 1px solid #c7d2fe; padding: 14px 28px; border-radius: 12px;">{otp}</span>
+      </div>
+      <p style="font-size: 13px; color: #64748b; line-height: 1.4;">This OTP code expires in <strong>5 minutes</strong>. For your security, do not share this code with anyone.</p>
+      <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+      <p style="font-size: 12px; color: #94a3b8; margin-bottom: 0;">Warm regards,<br>The Closet Share Team</p>
+    </div>
+    """
+
+    # Always log the OTP to the console so developers and testers are never blocked
+    print("\n" + "="*65)
+    print(f"  [CLOSET SHARE OTP DISPATCH]")
+    print(f"  Recipient : {to_email}")
+    print(f"  Purpose   : {purpose.upper()}")
+    print(f"  OTP Code  : >>> {otp} <<< (valid for 5 minutes)")
+    print("="*65)
+
+    errors = []
+
+    # 1. Attempt sending via Resend API (https://resend.com)
+    resend_api_key = os.environ.get('RESEND_API_KEY') or app.config.get('RESEND_API_KEY')
+    if resend_api_key and resend_api_key.strip():
+        resend_sender = os.environ.get('RESEND_SENDER') or app.config.get('RESEND_SENDER') or 'onboarding@resend.dev'
         try:
-            error_response = e.read().decode('utf-8')
-        except Exception:
-            error_response = "Could not read error response body"
-            
-        print("\n" + "="*60)
-        print(f"  [BREVO API EMAIL SENDING HTTP ERROR]")
-        print(f"  Recipient: {to_email}")
-        print(f"  HTTP Status Code: {status_code}")
-        print(f"  Brevo Error Response: {error_response}")
-        print("="*60 + "\n")
-        return False
+            req_data = {
+                "from": resend_sender,
+                "to": [to_email],
+                "subject": subject,
+                "text": body,
+                "html": html_body
+            }
+            req = urllib.request.Request(
+                "https://api.resend.com/emails",
+                data=json.dumps(req_data).encode('utf-8'),
+                headers={
+                    "Authorization": f"Bearer {resend_api_key.strip()}",
+                    "Content-Type": "application/json"
+                },
+                method='POST'
+            )
+            with urllib.request.urlopen(req, timeout=10) as response:
+                res_data = json.loads(response.read().decode('utf-8'))
+                if "id" in res_data:
+                    print(f"  [EMAIL DISPATCH SUCCESS] Sent via Resend API (ID: {res_data['id']}) to {to_email}")
+                    return True
+                errors.append(f"Resend unexpected response: {res_data}")
+        except urllib.error.HTTPError as e:
+            err_msg = e.read().decode('utf-8', errors='ignore')
+            print(f"  [RESEND API HTTP ERROR {e.code}]: {err_msg}")
+            errors.append(f"Resend HTTP {e.code}: {err_msg}")
+        except Exception as e:
+            print(f"  [RESEND API ERROR]: {e}")
+            errors.append(f"Resend error: {e}")
+
+    # 2. Attempt sending via Brevo API (https://brevo.com)
+    brevo_api_key = os.environ.get('BREVO_API_KEY') or app.config.get('BREVO_API_KEY')
+    if brevo_api_key and brevo_api_key.strip():
+        brevo_sender_email = os.environ.get('BREVO_SENDER_EMAIL') or app.config.get('BREVO_SENDER_EMAIL') or 'no-reply@closetshare.com'
+        brevo_sender_name = os.environ.get('BREVO_SENDER_NAME') or app.config.get('BREVO_SENDER_NAME') or 'Closet Share'
+        try:
+            req_data = {
+                "sender": {"name": brevo_sender_name, "email": brevo_sender_email},
+                "to": [{"email": to_email}],
+                "subject": subject,
+                "textContent": body,
+                "htmlContent": html_body
+            }
+            req = urllib.request.Request(
+                "https://api.brevo.com/v3/smtp/email",
+                data=json.dumps(req_data).encode('utf-8'),
+                headers={
+                    "api-key": brevo_api_key.strip(),
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                method='POST'
+            )
+            with urllib.request.urlopen(req, timeout=10) as response:
+                print(f"  [EMAIL DISPATCH SUCCESS] Sent via Brevo API to {to_email}")
+                return True
+        except urllib.error.HTTPError as e:
+            err_msg = e.read().decode('utf-8', errors='ignore')
+            print(f"  [BREVO API HTTP ERROR {e.code}]: {err_msg}")
+            errors.append(f"Brevo HTTP {e.code}: {err_msg}")
+        except Exception as e:
+            print(f"  [BREVO API ERROR]: {e}")
+            errors.append(f"Brevo error: {e}")
+
+    # 3. Attempt sending via SMTP (e.g. Gmail SMTP)
+    smtp_server = os.environ.get('SMTP_SERVER') or app.config.get('SMTP_SERVER', 'smtp.gmail.com')
+    smtp_port = int(os.environ.get('SMTP_PORT') or app.config.get('SMTP_PORT', 587))
+    smtp_user = os.environ.get('SMTP_USERNAME') or app.config.get('SMTP_USERNAME')
+    smtp_pass = os.environ.get('SMTP_PASSWORD') or app.config.get('SMTP_PASSWORD')
+    smtp_sender = os.environ.get('SMTP_SENDER') or app.config.get('SMTP_SENDER')
+    
+    # Avoid placeholder dummy addresses
+    if smtp_user and smtp_pass and smtp_user not in ('dummy-sender@clothesrent.com', 'your-email@gmail.com'):
+        # For Gmail SMTP, sender must match authenticated user or account
+        sender_addr = smtp_sender if (smtp_sender and '@' in smtp_sender and 'noreply@gmail.com' not in smtp_sender) else smtp_user
+        try:
+            msg = MIMEMultipart('alternative')
+            msg['Subject'] = Header(subject, 'utf-8')
+            msg['From'] = f"Closet Share <{sender_addr}>"
+            msg['To'] = to_email
+
+            part1 = MIMEText(body, 'plain', 'utf-8')
+            part2 = MIMEText(html_body, 'html', 'utf-8')
+            msg.attach(part1)
+            msg.attach(part2)
+
+            server = smtplib.SMTP(smtp_server, smtp_port, timeout=12)
+            server.ehlo()
+            server.starttls()
+            server.ehlo()
+            server.login(smtp_user, smtp_pass)
+            server.sendmail(sender_addr, [to_email], msg.as_string())
+            server.quit()
+            print(f"  [EMAIL DISPATCH SUCCESS] Sent via SMTP ({smtp_server}:{smtp_port}) to {to_email}")
+            return True
+        except Exception as e:
+            print(f"  [SMTP DISPATCH ERROR]: {e}")
+            errors.append(f"SMTP error: {e}")
+
+    # If no provider succeeded:
+    if errors:
+        print(f"  [EMAIL WARNING] Delivery attempts failed: {'; '.join(errors)}")
+        print(f"  [DEVELOPER NOTICE] The OTP ({otp}) is displayed in the console above.")
+    else:
+        print(f"  [EMAIL NOTICE] No email provider configured (set RESEND_API_KEY, BREVO_API_KEY, or SMTP credentials).")
+        print(f"  [DEVELOPER NOTICE] The OTP ({otp}) is displayed in the console above.")
         
-    except Exception as e:
-        print("\n" + "="*60)
-        print(f"  [BREVO API EMAIL SENDING GENERAL ERROR]")
-        print(f"  Recipient: {to_email}")
-        print(f"  Error details: {e}")
-        print("="*60 + "\n")
-        return False
+    return False
 # Database Configuration (PostgreSQL on Render, SQLite locally)
 database_url = os.environ.get("DATABASE_URL")
 if database_url:
@@ -273,190 +360,252 @@ def generate_virtual_3d_image(filename, category):
         print(f"AI 3D Image generation failed: {e}")
         return filename
 
-# ── Expanded catalog with Indian + Western cultural categories ───────────────
+# ── Expanded catalog with Indian + Western + Fusion cultural categories ─────────
 INDIAN_WESTERN_CATALOG = [
-    # ── INDIAN CULTURE ────────────────────────────────────────────────────────
+    # ── INDIAN HERITAGE ───────────────────────────────────────────────────────
     {
-        'name': 'Royal Indigo Sherwani',
-        'description': 'Regal pure-silk sherwani with intricate gold zardozi embroidery — perfect for weddings and sangeet ceremonies.',
-        'price_per_day': 6000.0,
-        'image_file': 'royal_indigo_sherwani.jpg',
-        'culture': 'indian',
-        'clothing_type': 'sherwani',
-        'gender': 'men',
-        'gallery': ['royal_indigo_sherwani.jpg'],
-    },
-    {
-        'name': 'Golden Shimmer Saree',
-        'description': 'Opulent Banarasi silk saree with heavy zari border and cascading gold pallav. An heirloom-quality bridal statement.',
-        'price_per_day': 4800.0,
-        'image_file': 'golden_shimmer_sari.jpg',
-        'culture': 'indian',
-        'clothing_type': 'saree',
-        'gender': 'women',
-        'gallery': ['golden_shimmer_sari.jpg'],
-    },
-    {
-        'name': 'Crimson Bridal Lehenga',
-        'description': 'Hand-crafted red lehenga choli adorned with mirror-work and resham embroidery — the quintessential bridal silhouette.',
+        'name': 'Zardozi Crimson Bridal Lehenga',
+        'description': 'Handcrafted crimson velvet lehenga choli adorned with heritage zardozi gold threadwork, antique sequins, and sheer embroidered net dupatta.',
         'price_per_day': 7500.0,
-        'image_file': 'ruby_crimson_blazer.jpg',
+        'image_file': 'lehenga_crimson_bridal_1.jpg',
         'culture': 'indian',
         'clothing_type': 'lehenga',
         'gender': 'women',
-        'gallery': ['ruby_crimson_blazer.jpg'],
+        'gallery': ['lehenga_crimson_bridal_1.jpg', 'lehenga_crimson_bridal_2.jpg'],
     },
     {
-        'name': 'Pearl White Anarkali',
-        'description': 'Flowing floor-length Anarkali suit in chiffon with pearl and sequin detailing — ethereal for Eid or festive occasions.',
-        'price_per_day': 3800.0,
-        'image_file': 'champagne_silk_gown.jpg',
-        'culture': 'indian',
-        'clothing_type': 'kurta',
-        'gender': 'women',
-        'gallery': ['champagne_silk_gown.jpg'],
-    },
-    {
-        'name': 'Emerald Bandhgala Suit',
-        'description': 'Sharp tailored bandhgala in rich emerald brocade with contrast piping — a modern take on Indian formal menswear.',
-        'price_per_day': 4200.0,
-        'image_file': 'emerald_silk_slip.jpg',
-        'culture': 'indian',
-        'clothing_type': 'suit',
-        'gender': 'men',
-        'gallery': ['emerald_silk_slip.jpg'],
-    },
-    {
-        'name': 'Champagne Silk Saree',
-        'description': 'Fluid champagne-hued crepe saree with delicate golden embroidery along the border — ideal for cocktail parties and receptions.',
-        'price_per_day': 3500.0,
-        'image_file': 'champagne_silk_gown.jpg',
+        'name': 'Royal Kanjivaram Silk Saree',
+        'description': 'Authentic pure mulberry silk saree woven with real gold zari temple borders, contrast rich pallu, and opulent jewel tones.',
+        'price_per_day': 4800.0,
+        'image_file': 'saree_royal_kanjivaram_1.jpg',
         'culture': 'indian',
         'clothing_type': 'saree',
         'gender': 'women',
-        'gallery': ['champagne_silk_gown.jpg'],
+        'gallery': ['saree_royal_kanjivaram_1.jpg', 'saree_royal_kanjivaram_2.jpg'],
     },
-    # ── WESTERN CULTURE ───────────────────────────────────────────────────────
     {
-        'name': 'Midnight Gala Gown',
-        'description': 'Sculptural midnight-black floor-length gown with structured bodice and cascading skirt — made for red carpet entrances.',
+        'name': 'Heritage Banarasi Brocade Saree',
+        'description': 'Heirloom handloom Banarasi katan silk saree featuring intricate floral kadwa weaves and lustrous metallic gold sheen.',
+        'price_per_day': 5200.0,
+        'image_file': 'saree_banarasi_brocade_1.jpg',
+        'culture': 'indian',
+        'clothing_type': 'saree',
+        'gender': 'women',
+        'gallery': ['saree_banarasi_brocade_1.jpg', 'saree_banarasi_brocade_2.jpg'],
+    },
+    {
+        'name': 'Rose Quartz Chikankari Anarkali',
+        'description': 'Graceful pastel blush georgette floor-sweeping Anarkali suit with delicate Lucknowi chikankari embroidery and mukaish highlights.',
+        'price_per_day': 3600.0,
+        'image_file': 'anarkali_rose_chikankari_1.jpg',
+        'culture': 'indian',
+        'clothing_type': 'kurta',
+        'gender': 'women',
+        'gallery': ['anarkali_rose_chikankari_1.jpg', 'anarkali_rose_chikankari_2.jpg'],
+    },
+    {
+        'name': 'Mustard Festive Georgette Sharara',
+        'description': 'Celebratory turmeric yellow kurta-sharara set with gota patti detailing and lightweight scalloped dupatta — ideal for Haldi & Mehendi.',
+        'price_per_day': 3200.0,
+        'image_file': 'sharara_mustard_georgette_1.jpg',
+        'culture': 'indian',
+        'clothing_type': 'kurta',
+        'gender': 'women',
+        'gallery': ['sharara_mustard_georgette_1.jpg', 'sharara_mustard_georgette_2.jpg'],
+    },
+    {
+        'name': 'Royal Ivory Groom Sherwani',
+        'description': 'Bespoke ivory raw-silk wedding sherwani with hand-embroidered resham motifs, mandarin collar, and royal ceremonial stole.',
+        'price_per_day': 6500.0,
+        'image_file': 'sherwani_ivory_groom_1.jpg',
+        'culture': 'indian',
+        'clothing_type': 'sherwani',
+        'gender': 'men',
+        'gallery': ['sherwani_ivory_groom_1.jpg', 'sherwani_ivory_groom_2.jpg'],
+    },
+    {
+        'name': 'Midnight Maroon Velvet Sherwani',
+        'description': 'Regal deep-wine micro-velvet sherwani embellished with antique gold dabka embroidery, tailored for royal grooms and sangeet nights.',
+        'price_per_day': 6800.0,
+        'image_file': 'sherwani_maroon_velvet_1.jpg',
+        'culture': 'indian',
+        'clothing_type': 'sherwani',
+        'gender': 'men',
+        'gallery': ['sherwani_maroon_velvet_1.jpg', 'sherwani_maroon_velvet_2.jpg'],
+    },
+    {
+        'name': 'Jodhpuri Silk Bandhgala Suit',
+        'description': 'Master-tailored structured Jodhpuri bandhgala in rich silk blend with bespoke brass buttons and matching tapered trousers.',
         'price_per_day': 4500.0,
-        'image_file': 'midnight_gala_gown.jpg',
+        'image_file': 'bandhgala_jodhpuri_silk_1.jpg',
+        'culture': 'indian',
+        'clothing_type': 'suit',
+        'gender': 'men',
+        'gallery': ['bandhgala_jodhpuri_silk_1.jpg', 'bandhgala_jodhpuri_silk_2.jpg'],
+    },
+
+    # ── WESTERN ELEGANCE ──────────────────────────────────────────────────────
+    {
+        'name': 'Midnight Gala Velvet Gown',
+        'description': 'Dramatic black velvet column gown with structured corset bodice, off-the-shoulder drape, and an ethereal sweeping train.',
+        'price_per_day': 4900.0,
+        'image_file': 'gown_midnight_velvet_1.jpg',
         'culture': 'western',
         'clothing_type': 'gown',
         'gender': 'women',
-        'gallery': ['midnight_gala_gown.jpg'],
+        'gallery': ['gown_midnight_velvet_1.jpg', 'gown_midnight_velvet_2.jpg'],
     },
     {
-        'name': 'Classic Tailored Suit',
-        'description': 'Italian-cut charcoal wool suit — the definitive power suit for board meetings, galas, and landmark occasions.',
-        'price_per_day': 3200.0,
-        'image_file': 'classic_tailored_suit.jpg',
-        'culture': 'western',
-        'clothing_type': 'suit',
-        'gender': 'men',
-        'gallery': ['classic_tailored_suit.jpg'],
-    },
-    {
-        'name': 'Emerald Silk Slip',
-        'description': 'Bias-cut emerald slip dress in pure silk charmeuse — understated, sensual, and effortlessly luxurious.',
-        'price_per_day': 2800.0,
-        'image_file': 'emerald_silk_slip.jpg',
+        'name': 'Emerald Silk Charmeuse Slip Dress',
+        'description': 'Bias-cut evening slip dress in liquid emerald pure silk charmeuse with fluid cowl neckline and low-back crossover straps.',
+        'price_per_day': 3100.0,
+        'image_file': 'slip_emerald_charmeuse_1.jpg',
         'culture': 'western',
         'clothing_type': 'cocktail',
         'gender': 'women',
-        'gallery': ['emerald_silk_slip.jpg'],
+        'gallery': ['slip_emerald_charmeuse_1.jpg', 'slip_emerald_charmeuse_2.jpg'],
     },
     {
-        'name': 'Velvet Black Tuxedo',
-        'description': 'Deep-black velvet tuxedo with satin lapels and slim-cut trousers — the gold standard for black-tie events.',
-        'price_per_day': 5500.0,
-        'image_file': 'velvet_tuxedo.jpg',
+        'name': 'Scarlet Red Corset Ballgown',
+        'description': 'High-drama ruby red ballroom gown with boned lace-up corset, architectural sweetheart neck, and billowing satin ball skirt.',
+        'price_per_day': 5400.0,
+        'image_file': 'gown_scarlet_corset_1.jpg',
         'culture': 'western',
-        'clothing_type': 'tuxedo',
-        'gender': 'men',
-        'gallery': ['velvet_tuxedo.jpg'],
+        'clothing_type': 'gown',
+        'gender': 'women',
+        'gallery': ['gown_scarlet_corset_1.jpg', 'gown_scarlet_corset_2.jpg'],
     },
     {
-        'name': 'Sapphire Evening Gown',
-        'description': 'Strapless sapphire-blue duchess satin gown with a sweeping train — breathtaking for galas and awards ceremonies.',
+        'name': 'Champagne Crystal Evening Gown',
+        'description': 'Ethereal liquid champagne gown dusted with hand-placed micro-crystals and soft metallic fringe for red carpet events.',
+        'price_per_day': 5600.0,
+        'image_file': 'gown_champagne_crystal_1.jpg',
+        'culture': 'western',
+        'clothing_type': 'gown',
+        'gender': 'women',
+        'gallery': ['gown_champagne_crystal_1.jpg', 'gown_champagne_crystal_2.jpg'],
+    },
+    {
+        'name': 'Blush Pink Tiered Tulle Gown',
+        'description': 'Romantic pastel blush evening gown with tiered French tulle skirt, delicate illusion neckline, and hand-embroidered florals.',
         'price_per_day': 4200.0,
-        'image_file': 'sapphire_evening_dress.jpg',
+        'image_file': 'gown_blush_tulle_1.jpg',
         'culture': 'western',
         'clothing_type': 'gown',
         'gender': 'women',
-        'gallery': ['sapphire_evening_dress.jpg'],
+        'gallery': ['gown_blush_tulle_1.jpg', 'gown_blush_tulle_2.jpg'],
     },
     {
-        'name': 'Rose Gold Prom Dress',
-        'description': 'Dreamy A-line prom dress in rose gold mikado fabric with hand-stitched floral appliqué — romantic and luminous.',
-        'price_per_day': 3900.0,
-        'image_file': 'rose_gold_prom_dress.jpg',
-        'culture': 'western',
-        'clothing_type': 'gown',
-        'gender': 'women',
-        'gallery': ['rose_gold_prom_dress.jpg'],
-    },
-    {
-        'name': 'Ivory Wedding Tuxedo',
-        'description': 'Pristine ivory tuxedo with grosgrain lapels and matching trousers — crafted for grooms and best men.',
-        'price_per_day': 5800.0,
-        'image_file': 'ivory_wedding_tux.jpg',
+        'name': 'Obsidian Satin-Lapel Black Tuxedo',
+        'description': 'Sharp bespoke black tuxedo in Super 130s wool with silk grosgrain peak lapels, tailored trousers, and matching silk bowtie.',
+        'price_per_day': 5500.0,
+        'image_file': 'tuxedo_obsidian_black_1.jpg',
         'culture': 'western',
         'clothing_type': 'tuxedo',
         'gender': 'men',
-        'gallery': ['ivory_wedding_tux.jpg'],
+        'gallery': ['tuxedo_obsidian_black_1.jpg', 'tuxedo_obsidian_black_2.jpg'],
     },
     {
-        'name': 'Ruby Power Blazer',
-        'description': 'Striking scarlet double-breasted blazer in structured crepe — bold, authoritative, and undeniably chic for formal events.',
-        'price_per_day': 3500.0,
-        'image_file': 'ruby_crimson_blazer.jpg',
-        'culture': 'western',
-        'clothing_type': 'blazer',
-        'gender': 'women',
-        'gallery': ['ruby_crimson_blazer.jpg'],
-    },
-    {
-        'name': 'Charcoal Executive Suit',
-        'description': 'Deep charcoal fine-wool blend suit with peak lapels — distinguished elegance for high-stakes professional engagements.',
-        'price_per_day': 3400.0,
-        'image_file': 'charcoal_executive_suit.jpg',
+        'name': 'Italian Charcoal Pinstripe Suit',
+        'description': 'Classic Milanese-cut charcoal wool suit with subtle pinstripes, full-canvas construction, and breathable cupro lining.',
+        'price_per_day': 3800.0,
+        'image_file': 'suit_italian_charcoal_1.jpg',
         'culture': 'western',
         'clothing_type': 'suit',
         'gender': 'men',
-        'gallery': ['charcoal_executive_suit.jpg'],
+        'gallery': ['suit_italian_charcoal_1.jpg', 'suit_italian_charcoal_2.jpg'],
     },
     {
-        'name': 'Champagne Silk Evening Gown',
-        'description': 'Liquid-gold champagne silk gown with cowl neckline and soft draping — a timeless choice for soirées and galas.',
-        'price_per_day': 5000.0,
-        'image_file': 'champagne_silk_gown.jpg',
+        'name': 'Bespoke Ivory Peak-Lapel Tuxedo',
+        'description': 'Immaculate cream-white dinner jacket tuxedo with contrasting black grosgrain lapels and dress trousers for summer galas.',
+        'price_per_day': 5900.0,
+        'image_file': 'tuxedo_ivory_peak_1.jpg',
         'culture': 'western',
+        'clothing_type': 'tuxedo',
+        'gender': 'men',
+        'gallery': ['tuxedo_ivory_peak_1.jpg', 'tuxedo_ivory_peak_2.jpg'],
+    },
+
+    # ── FUSION COUTURE ────────────────────────────────────────────────────────
+    {
+        'name': 'Metallic Draped Concept Saree Gown',
+        'description': 'Sculptural pre-pleated concept saree draped seamlessly over an architectural crepe bodice — modern runway meets Indian grace.',
+        'price_per_day': 5500.0,
+        'image_file': 'fusion_draped_saree_gown_1.jpg',
+        'culture': 'fusion',
         'clothing_type': 'gown',
         'gender': 'women',
-        'gallery': ['champagne_silk_gown.jpg'],
+        'gallery': ['fusion_draped_saree_gown_1.jpg', 'fusion_draped_saree_gown_2.jpg'],
     },
-    # ── FUSION ────────────────────────────────────────────────────────────────
     {
-        'name': 'Indo-Western Floral Kurta',
-        'description': 'Contemporary kurta-jacket set blending Mughal floral prints with a sharp Western-cut collar — the perfect fusion statement.',
-        'price_per_day': 2600.0,
-        'image_file': 'royal_indigo_sherwani.jpg',
+        'name': 'Brocade Asymmetric Indo-Western Tuxedo',
+        'description': 'Gold Banarasi brocade dinner jacket cut with modern western asymmetric overlap lapels and cigarette formal trousers.',
+        'price_per_day': 4600.0,
+        'image_file': 'fusion_brocade_tuxedo_1.jpg',
+        'culture': 'fusion',
+        'clothing_type': 'tuxedo',
+        'gender': 'men',
+        'gallery': ['fusion_brocade_tuxedo_1.jpg', 'fusion_brocade_tuxedo_2.jpg'],
+    },
+    {
+        'name': 'Cape-Sleeve Embroidered Cocktail Gown',
+        'description': 'Fitted cocktail silhouette with cascading sheer organza cape sleeves, botanical threadwork, and thigh-high side slit.',
+        'price_per_day': 4100.0,
+        'image_file': 'fusion_cape_cocktail_1.jpg',
+        'culture': 'fusion',
+        'clothing_type': 'cocktail',
+        'gender': 'women',
+        'gallery': ['fusion_cape_cocktail_1.jpg', 'fusion_cape_cocktail_2.jpg'],
+    },
+    {
+        'name': 'Contemporary Bandhgala Tuxedo Hybrid',
+        'description': 'Innovative closed mandarin collar jacket tailored in Western wool twill with contrast pocket flap styling and modern cut.',
+        'price_per_day': 4400.0,
+        'image_file': 'fusion_bandhgala_hybrid_1.jpg',
+        'culture': 'fusion',
+        'clothing_type': 'suit',
+        'gender': 'men',
+        'gallery': ['fusion_bandhgala_hybrid_1.jpg', 'fusion_bandhgala_hybrid_2.jpg'],
+    },
+    {
+        'name': 'Embellished Velvet Corset & Palazzo Set',
+        'description': 'Midnight velvet boned bustier top paired with voluminous pure-silk wide-leg palazzos and embroidered belt.',
+        'price_per_day': 3800.0,
+        'image_file': 'fusion_velvet_palazzo_1.jpg',
+        'culture': 'fusion',
+        'clothing_type': 'other',
+        'gender': 'women',
+        'gallery': ['fusion_velvet_palazzo_1.jpg', 'fusion_velvet_palazzo_2.jpg'],
+    },
+    {
+        'name': 'Modern Pastel Nehru Jacket & Chino Set',
+        'description': 'Raw-silk mint pastel sleeveless Nehru waistcoat paired with fine Egyptian linen kurta and crisp formal slim chinos.',
+        'price_per_day': 2900.0,
+        'image_file': 'fusion_nehru_chino_1.jpg',
+        'culture': 'fusion',
+        'clothing_type': 'suit',
+        'gender': 'men',
+        'gallery': ['fusion_nehru_chino_1.jpg', 'fusion_nehru_chino_2.jpg'],
+    },
+    {
+        'name': 'Ruby Silk Tailored Cape Blazer',
+        'description': 'Dramatic scarlet structured silk blazer featuring split cape sleeves, peak lapels, and polished gold insignia buttons.',
+        'price_per_day': 3600.0,
+        'image_file': 'fusion_cape_blazer_1.jpg',
+        'culture': 'fusion',
+        'clothing_type': 'blazer',
+        'gender': 'women',
+        'gallery': ['fusion_cape_blazer_1.jpg', 'fusion_cape_blazer_2.jpg'],
+    },
+    {
+        'name': 'Royal Indigo Draped Kurta-Suit',
+        'description': 'Asymmetric cowl kurta in rich indigo silk layered under a sharp tailored Western single-breasted blazer and trousers.',
+        'price_per_day': 3900.0,
+        'image_file': 'fusion_indigo_draped_1.jpg',
         'culture': 'fusion',
         'clothing_type': 'kurta',
         'gender': 'men',
-        'gallery': ['royal_indigo_sherwani.jpg'],
-    },
-    {
-        'name': 'Contemporary Draped Gown',
-        'description': 'A dramatic modern gown with saree-inspired draping over a fitted silk corset — East meets West in haute couture.',
-        'price_per_day': 5200.0,
-        'image_file': 'emerald_silk_slip.jpg',
-        'culture': 'fusion',
-        'clothing_type': 'gown',
-        'gender': 'women',
-        'gallery': ['emerald_silk_slip.jpg'],
+        'gallery': ['fusion_indigo_draped_1.jpg', 'fusion_indigo_draped_2.jpg'],
     },
 ]
 
@@ -535,27 +684,42 @@ with app.app_context():
             admin.is_verified = True
             db.session.commit()
 
-        # Backfill cultural metadata for existing dresses from catalog definition
+        # Sync all 24 catalog items into database with multi-photo galleries
         try:
-            catalog_by_name = {item['name']: item for item in INDIAN_WESTERN_CATALOG}
-            existing_dresses = Dress.query.all()
-            for d in existing_dresses:
-                meta = catalog_by_name.get(d.name)
-                if meta:
-                    d.image_file = meta['image_file']
+            existing_dresses_by_name = {d.name: d for d in Dress.query.all()}
+            for item in INDIAN_WESTERN_CATALOG:
+                if item['name'] in existing_dresses_by_name:
+                    d = existing_dresses_by_name[item['name']]
+                    d.description = item['description']
+                    d.price_per_day = item['price_per_day']
+                    d.image_file = item['image_file']
                     d.css_filter = ''
-                    d.culture = meta.get('culture', d.culture or 'western')
-                    d.clothing_type = meta.get('clothing_type', d.clothing_type or 'other')
-                    d.gender = meta.get('gender', d.gender or 'unisex')
-                    # Backfill gallery images if missing
-                    if not d.gallery_images:
-                        for idx, img in enumerate(meta.get('gallery', [meta['image_file']])):
-                            db.session.add(DressImage(dress_id=d.id, image_file=img, sort_order=idx))
-                elif d.image_file and d.image_file.startswith('virtual_3d_'):
-                    d.image_file = d.image_file.replace('virtual_3d_', '')
+                    d.culture = item.get('culture', 'western')
+                    d.clothing_type = item.get('clothing_type', 'other')
+                    d.gender = item.get('gender', 'unisex')
+                    # Sync gallery images
+                    DressImage.query.filter_by(dress_id=d.id).delete()
+                    for idx, img in enumerate(item.get('gallery', [item['image_file']])):
+                        db.session.add(DressImage(dress_id=d.id, image_file=img, sort_order=idx))
+                else:
+                    d = Dress(
+                        name=item['name'],
+                        description=item['description'],
+                        price_per_day=item['price_per_day'],
+                        image_file=item['image_file'],
+                        css_filter='',
+                        culture=item.get('culture', 'western'),
+                        clothing_type=item.get('clothing_type', 'other'),
+                        gender=item.get('gender', 'unisex'),
+                    )
+                    db.session.add(d)
+                    db.session.flush()
+                    for idx, img in enumerate(item.get('gallery', [item['image_file']])):
+                        db.session.add(DressImage(dress_id=d.id, image_file=img, sort_order=idx))
             db.session.commit()
         except Exception as d_err:
-            print(f"Startup catalog migration failed: {d_err}")
+            print(f"Startup catalog sync failed: {d_err}")
+
 
 @app.route('/')
 def index():
